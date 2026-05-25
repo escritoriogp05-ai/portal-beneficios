@@ -156,7 +156,7 @@ label{font-size:12px;color:var(--gray-700);display:block;margin-bottom:4px;font-
   <!-- CONFIG BANNER — aparece se Firebase não estiver configurado -->
   <div class="config-banner" id="config-banner" style="display:none">
     <h3><i class="ti ti-alert-triangle"></i> Configure o Firebase para sincronizar os dados</h3>
-    <p>Substitua as credenciais abaixo no código (<code>AIzaSyAFgj2NPKrfd8HaYwanGrHIV1XaNcoCqOY</code>, <code>big-trading-beneficios</code>, etc.) pelas credenciais do seu projeto Firebase. Veja as instruções no arquivo README incluso.</p>
+    <p>Substitua as credenciais abaixo no código (<code>AIzaSyAFgj2NPKrfd8HaYwanGrHIV1XaNcoCqOY</code>, <code>SEU_PROJECT_ID</code>, etc.) pelas credenciais do seu projeto Firebase. Veja as instruções no arquivo README incluso.</p>
     <button class="btn btn-sm" style="background:#856404;color:#fff;border-color:#856404" onclick="document.getElementById('config-banner').style.display='none'">Entendi</button>
   </div>
 
@@ -331,11 +331,11 @@ import { getFirestore, collection, doc, getDocs, setDoc, addDoc, deleteDoc, upda
 // ══════════════════════════════════════════════════
 const firebaseConfig = {
   apiKey: "AIzaSyAFgj2NPKrfd8HaYwanGrHIV1XaNcoCqOY",
-  authDomain: "big-trading-beneficios.firebaseapp.com",
-  projectId: "big-trading-beneficios",
-  storageBucket: "big-trading-beneficios.appspot.com",
-  messagingSenderId: "68320224492",
-  appId: "1:68320224492:web:695683975l3856654271c9"
+  authDomain: "SEU_PROJECT_ID.firebaseapp.com",
+  projectId: "SEU_PROJECT_ID",
+  storageBucket: "SEU_PROJECT_ID.appspot.com",
+  messagingSenderId: "SEU_MESSAGING_SENDER_ID",
+  appId: "SEU_APP_ID"
 };
 // ══════════════════════════════════════════════════
 
