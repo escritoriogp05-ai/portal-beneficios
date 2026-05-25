@@ -83,6 +83,11 @@ label{font-size:12px;color:var(--gray-700);display:block;margin-bottom:4px;font-
 .tag.loja{background:var(--blue-50);color:var(--blue-900)}
 .tag.benef{background:var(--green-50);color:var(--green-900)}
 .tag.valor{background:var(--amber-50);color:var(--amber-700)}
+/* Multi-select benefícios */
+.benef-select-list{display:flex;flex-wrap:wrap;gap:8px;margin-top:4px}
+.benef-select-item{display:flex;align-items:center;gap:6px;padding:7px 14px;border-radius:99px;border:1.5px solid var(--gray-200);background:var(--gray-100);cursor:pointer;font-size:13px;font-family:var(--font);color:var(--gray-700);transition:all .15s;user-select:none}
+.benef-select-item.selected{background:var(--green-50);border-color:var(--green-600);color:var(--green-900);font-weight:600}
+.benef-select-item:hover{border-color:var(--green-600)}
 .info-bar{padding:10px 14px;border-radius:var(--radius);background:var(--gray-100);font-size:13px;color:var(--gray-700);margin-bottom:1rem;display:flex;align-items:center;gap:8px;border:1px solid var(--gray-200)}
 .success-msg{background:var(--green-50);border:1px solid var(--green-100);border-radius:var(--radius);padding:10px 14px;font-size:13px;color:var(--green-900);margin-top:8px;display:flex;align-items:center;gap:8px}
 .warn-bar{background:var(--amber-50);border:1px solid var(--amber-100);border-radius:var(--radius);padding:10px 14px;font-size:13px;color:var(--amber-700);margin-top:10px;display:flex;align-items:center;gap:8px}
@@ -156,7 +161,7 @@ label{font-size:12px;color:var(--gray-700);display:block;margin-bottom:4px;font-
   <!-- CONFIG BANNER — aparece se Firebase não estiver configurado -->
   <div class="config-banner" id="config-banner" style="display:none">
     <h3><i class="ti ti-alert-triangle"></i> Configure o Firebase para sincronizar os dados</h3>
-    <p>Substitua as credenciais abaixo no código (<code>AIzaSyAFgj2NPKrfd8HaYwanGrHIV1XaNcoCqOY</code>, <code>SEU_PROJECT_ID</code>, etc.) pelas credenciais do seu projeto Firebase. Veja as instruções no arquivo README incluso.</p>
+    <p>Substitua as credenciais abaixo no código (<code>SEU_API_KEY</code>, <code>SEU_PROJECT_ID</code>, etc.) pelas credenciais do seu projeto Firebase. Veja as instruções no arquivo README incluso.</p>
     <button class="btn btn-sm" style="background:#856404;color:#fff;border-color:#856404" onclick="document.getElementById('config-banner').style.display='none'">Entendi</button>
   </div>
 
@@ -331,11 +336,11 @@ import { getFirestore, collection, doc, getDocs, setDoc, addDoc, deleteDoc, upda
 // ══════════════════════════════════════════════════
 const firebaseConfig = {
   apiKey: "AIzaSyAFgj2NPKrfd8HaYwanGrHIV1XaNcoCqOY",
-  authDomain: "SEU_PROJECT_ID.firebaseapp.com",
-  projectId: "SEU_PROJECT_ID",
-  storageBucket: "SEU_PROJECT_ID.appspot.com",
-  messagingSenderId: "SEU_MESSAGING_SENDER_ID",
-  appId: "SEU_APP_ID"
+  authDomain: "big-trading-beneficios.firebaseapp.com",
+  projectId: "big-trading-beneficios",
+  storageBucket: "big-trading-beneficios.firebasestorage.app",
+  messagingSenderId: "68320224492",
+  appId: "1:68320224492:web:695683975l3856654271c9"
 };
 // ══════════════════════════════════════════════════
 
@@ -578,10 +583,20 @@ function searchEmployee(){
           <div class="uso-form-title"><i class="ti ti-clipboard-check"></i> Registrar uso do benefício</div>
           <div class="form-row">
             <div><label>Loja *</label><select id="loja-${eid}">${lojas.map(l=>`<option value="${l}">${l}</option>`).join('')}</select></div>
-            <div><label>Tipo de benefício *</label><select id="tipo-${eid}"><option value="">Selecione...</option>${bs.map(b=>`<option value="${b}">${b}</option>`).join('')}</select></div>
+            <div><label>Responsável pelo atendimento *</label><input type="text" id="resp-${eid}" placeholder="Nome do atendente..."></div>
+          </div>
+          <div style="margin-bottom:10px">
+            <label>Benefícios utilizados * <span style="font-weight:400;color:var(--gray-400)">(selecione um ou mais)</span></label>
+            <div class="benef-select-list" id="benef-sel-${eid}">
+              ${bs.map(b=>`<div class="benef-select-item" onclick="toggleBenefSel(this)" data-benef="${b}"><i class="ti ti-plus" style="font-size:12px"></i>${b}</div>`).join('')}
+            </div>
           </div>
           <div class="form-row">
             <div><label>Valor da compra (R$)</label><input type="number" id="valor-${eid}" placeholder="0,00" min="0" step="0.01"></div>
+            <div><label>Valor com desconto (R$)</label><input type="number" id="desconto-${eid}" placeholder="0,00" min="0" step="0.01"></div>
+          </div>
+          <div class="form-row">
+            <div><label>Número da nota fiscal</label><input type="text" id="nf-${eid}" placeholder="Ex: 000123"></div>
             <div><label>Observação (opcional)</label><input type="text" id="obs-${eid}" placeholder="Detalhes adicionais..."></div>
           </div>
           <button class="btn btn-green btn-full" id="btn-${eid}" onclick="registrarUso('${eid}','${ne}')">
@@ -593,17 +608,29 @@ function searchEmployee(){
 }
 window.searchEmployee=searchEmployee;
 
+function toggleBenefSel(el){
+  el.classList.toggle('selected');
+  const i=el.querySelector('i');
+  i.className='ti ti-'+(el.classList.contains('selected')?'check':'plus');
+  i.style.fontSize='12px';
+}
+window.toggleBenefSel=toggleBenefSel;
+
 async function registrarUso(eid, empNome){
   const loja=document.getElementById(`loja-${eid}`).value;
-  const tipo=document.getElementById(`tipo-${eid}`).value;
+  const resp=document.getElementById(`resp-${eid}`).value.trim();
+  const selectedBenefs=[...document.querySelectorAll(`#benef-sel-${eid} .benef-select-item.selected`)].map(el=>el.dataset.benef);
   const valor=parseFloat(document.getElementById(`valor-${eid}`).value)||0;
+  const desconto=parseFloat(document.getElementById(`desconto-${eid}`).value)||0;
+  const nf=document.getElementById(`nf-${eid}`).value.trim();
   const obs=document.getElementById(`obs-${eid}`).value.trim();
   if(!loja){alert('Selecione a loja.');return;}
-  if(!tipo){alert('Selecione o tipo de benefício.');return;}
+  if(!resp){alert('Informe o responsável pelo atendimento.');return;}
+  if(!selectedBenefs.length){alert('Selecione pelo menos um benefício utilizado.');return;}
   const btn=document.getElementById(`btn-${eid}`);
   btn.disabled=true;btn.innerHTML='<i class="ti ti-loader"></i> Registrando...';
   const now=new Date();
-  const registro={empId:eid,empNome,loja,tipo,valor,obs,
+  const registro={empId:eid,empNome,loja,responsavel:resp,tipos:selectedBenefs,tipo:selectedBenefs.join(', '),valor,desconto,nf,obs,
     data:now.toLocaleDateString('pt-BR'),
     hora:now.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}),
     ts:now.toISOString()};
@@ -611,7 +638,14 @@ async function registrarUso(eid, empNome){
   else { usos.unshift({...registro,id:Date.now()}); ls_set('big_uso_v4',usos); }
   document.getElementById(`msg-${eid}`).innerHTML=`<div class="success-msg"><i class="ti ti-circle-check" style="font-size:20px"></i> Uso registrado em ${registro.data} às ${registro.hora}</div>`;
   document.getElementById(`valor-${eid}`).value='';
+  document.getElementById(`desconto-${eid}`).value='';
+  document.getElementById(`nf-${eid}`).value='';
   document.getElementById(`obs-${eid}`).value='';
+  document.getElementById(`resp-${eid}`).value='';
+  document.querySelectorAll(`#benef-sel-${eid} .benef-select-item.selected`).forEach(el=>{
+    el.classList.remove('selected');
+    const i=el.querySelector('i');i.className='ti ti-plus';i.style.fontSize='12px';
+  });
   btn.disabled=false;btn.innerHTML='<i class="ti ti-check"></i> Confirmar uso do benefício';
 }
 window.registrarUso=registrarUso;
@@ -777,10 +811,17 @@ function renderHistorico(){
       <span class="uso-nome"><i class="ti ti-user" style="font-size:13px;vertical-align:-1px;margin-right:4px;color:var(--gray-400)"></i>${u.empNome}</span>
       <span class="uso-data">${u.data} · ${u.hora}</span>
     </div>
-    <div class="uso-detalhe">
+    <div class="uso-detalhe" style="margin-bottom:4px">
       <span class="tag loja"><i class="ti ti-building-store" style="font-size:11px"></i> ${u.loja}</span>
-      <span class="tag benef">${u.tipo}</span>
-      ${u.valor?`<span class="tag valor"><i class="ti ti-currency-real" style="font-size:11px"></i> ${formatValor(u.valor)}</span>`:''}
+      ${u.responsavel?`<span class="tag" style="background:var(--blue-50);color:var(--blue-900)"><i class="ti ti-user-check" style="font-size:11px"></i> ${u.responsavel}</span>`:''}
+    </div>
+    <div class="uso-detalhe" style="margin-bottom:4px">
+      ${(u.tipos||[u.tipo]).map(b=>`<span class="tag benef">${b}</span>`).join('')}
+    </div>
+    <div class="uso-detalhe">
+      ${u.valor?`<span class="tag valor"><i class="ti ti-currency-real" style="font-size:11px"></i> Compra: ${formatValor(u.valor)}</span>`:''}
+      ${u.desconto?`<span class="tag" style="background:#E1F5EE;color:#085041"><i class="ti ti-discount" style="font-size:11px"></i> C/ desconto: ${formatValor(u.desconto)}</span>`:''}
+      ${u.nf?`<span class="tag" style="background:var(--gray-100);color:var(--gray-700)"><i class="ti ti-receipt" style="font-size:11px"></i> NF: ${u.nf}</span>`:''}
       ${u.obs?`<span style="color:var(--gray-400)">— ${u.obs}</span>`:''}
     </div>
   </div>`).join('');
@@ -795,12 +836,12 @@ window.clearHistory=clearHistory;
 
 function exportCSV(){
   const f=getFiltered();if(!f.length){alert('Nenhum registro para exportar.');return;}
-  const cols=['Funcionário','CPF','Data de Nasc.','Idade','Cargo','Loja','Benefício Utilizado','Valor (R$)','Data','Hora','Observação'];
+  const cols=['Funcionário','CPF','Data de Nasc.','Idade','Cargo','Loja','Responsável Atendimento','Benefícios Utilizados','Nota Fiscal','Valor Compra (R$)','Valor c/ Desconto (R$)','Data','Hora','Observação'];
   const sep=';';
   const esc=v=>{const s=String(v===null||v===undefined?'':v);return s.includes(sep)||s.includes('"')||s.includes('\n')?'"'+s.replace(/"/g,'""')+'"':s;};
   const rows=f.map(u=>{
     const emp=employees.find(e=>e.fbId===u.empId||String(e.id)===String(u.empId));
-    return[u.empNome,emp?emp.cpf||'':'',emp&&emp.nascimento?formatNasc(emp.nascimento):'',emp&&emp.nascimento?calcIdade(emp.nascimento):'',emp?emp.cargo||'':'',u.loja,u.tipo,u.valor?u.valor.toFixed(2).replace('.',','):'',u.data,u.hora,u.obs||''].map(esc).join(sep);
+    return[u.empNome,emp?emp.cpf||'':'',emp&&emp.nascimento?formatNasc(emp.nascimento):'',emp&&emp.nascimento?calcIdade(emp.nascimento):'',emp?emp.cargo||'':'',u.loja,u.responsavel||'',(u.tipos||[u.tipo]).join('; '),u.nf||'',u.valor?u.valor.toFixed(2).replace('.',','):'',u.desconto?u.desconto.toFixed(2).replace('.',','):'',u.data,u.hora,u.obs||''].map(esc).join(sep);
   });
   const csv='\uFEFF'+cols.map(esc).join(sep)+'\r\n'+rows.join('\r\n');
   const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'});
