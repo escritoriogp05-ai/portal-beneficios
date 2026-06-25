@@ -230,6 +230,7 @@ label{font-size:12px;color:var(--gray-700);display:block;margin-bottom:4px;font-
           </div>
           <div class="form-row">
             <div><label>Cargo</label><input type="text" id="new-cargo" placeholder="Ex: Vendedora"></div>
+            <div><label>Setor / Loja</label><input type="text" id="new-setor" placeholder="Ex: Havaianas Manauara"></div>
             <div><label>Data de nascimento</label><input type="date" id="new-nascimento"></div>
             <div><label>Status</label><select id="new-status"><option value="ativo">Ativo</option><option value="inativo">Inativo</option></select></div>
           </div>
@@ -404,6 +405,7 @@ label{font-size:12px;color:var(--gray-700);display:block;margin-bottom:4px;font-
     </div>
     <div class="form-row">
       <div><label>Cargo</label><input type="text" id="edit-cargo" placeholder="Cargo"></div>
+      <div><label>Setor / Loja</label><input type="text" id="edit-setor" placeholder="Ex: Havaianas Manauara"></div>
       <div><label>Data de nascimento</label><input type="date" id="edit-nascimento"></div>
     </div>
     <div style="margin-bottom:10px"><label>Status</label>
@@ -670,6 +672,7 @@ function openEditModal(id){
   document.getElementById('edit-name').value=e.nome;
   document.getElementById('edit-cpf').value=e.cpf||'';
   document.getElementById('edit-cargo').value=e.cargo||'';
+  document.getElementById('edit-setor').value=e.setor||'';
   document.getElementById('edit-nascimento').value=e.nascimento||'';
   document.getElementById('edit-status').value=e.status;
   document.getElementById('edit-erro').textContent='';
@@ -680,7 +683,7 @@ async function salvarEdicao(){
   const fid=document.getElementById('edit-id').value;
   const nome=document.getElementById('edit-name').value.trim();
   if(!nome){document.getElementById('edit-erro').textContent='Nome é obrigatório.';return;}
-  const upd={nome,cpf:document.getElementById('edit-cpf').value.trim(),cargo:document.getElementById('edit-cargo').value.trim(),nascimento:document.getElementById('edit-nascimento').value,status:document.getElementById('edit-status').value};
+  const upd={nome,cpf:document.getElementById('edit-cpf').value.trim(),cargo:document.getElementById('edit-cargo').value.trim(),setor:document.getElementById('edit-setor').value.trim(),nascimento:document.getElementById('edit-nascimento').value,status:document.getElementById('edit-status').value};
   if(isConnected){
     await fbUpdate('employees',fid,upd);
   } else {
@@ -719,7 +722,7 @@ function searchEmployee(){
         <div class="avatar" style="background:${isAtivo?'#9FE1CB':'var(--red-200)'};color:${gc}">${initials(e.nome)}</div>
         <div>
           <div style="font-size:16px;font-weight:700;color:${gc}">${e.nome}${anivHoje(e.nascimento)?' 🎂':''}</div>
-          <div style="font-size:13px;color:${gs};margin-top:2px">${e.cargo||''}${e.cpf?' · '+e.cpf:''}${e.nascimento?' · Nasc. '+formatNasc(e.nascimento):''}</div>
+          <div style="font-size:13px;color:${gs};margin-top:2px">${e.cargo||''}${e.setor?' · '+e.setor:''}${e.cpf?' · '+e.cpf:''}${e.nascimento?' · Nasc. '+formatNasc(e.nascimento):''}</div>
         </div>
       </div>
       <span class="badge ${e.status}"><i class="ti ti-${isAtivo?'check':'x'}"></i> ${isAtivo?'Benefício Ativo':'Benefício Inativo'}</span>
@@ -929,7 +932,7 @@ function renderEmpList(){
             ${initials(e.nome)}</div>
           <div style="min-width:0">
             <div style="font-size:14px;font-weight:600">${e.nome}</div>
-            <div style="font-size:12px;color:var(--gray-700)">${e.cargo||''}${e.cpf?' · '+e.cpf:''}${e.nascimento?' · '+formatNasc(e.nascimento):''}</div>
+            <div style="font-size:12px;color:var(--gray-700)">${e.cargo||''}${e.setor?' · '+e.setor:''}${e.cpf?' · '+e.cpf:''}${e.nascimento?' · '+formatNasc(e.nascimento):''}</div>
             <div class="benef-emp-tags" id="etags-${eid}">${tagsHtml}</div>
           </div>
         </div>
@@ -999,10 +1002,10 @@ async function addEmployee(){
   const nome=document.getElementById('new-name').value.trim();
   if(!nome){document.getElementById('new-name').focus();return;}
   const selectedBenefs=[...document.querySelectorAll('#new-benef-toggles .benef-toggle.on')].map(l=>l.textContent.trim());
-  const emp={nome,cpf:document.getElementById('new-cpf').value.trim(),cargo:document.getElementById('new-cargo').value.trim(),nascimento:document.getElementById('new-nascimento').value,status:document.getElementById('new-status').value,beneficios:selectedBenefs,createdAt:new Date().toISOString()};
+  const emp={nome,cpf:document.getElementById('new-cpf').value.trim(),cargo:document.getElementById('new-cargo').value.trim(),setor:document.getElementById('new-setor').value.trim(),nascimento:document.getElementById('new-nascimento').value,status:document.getElementById('new-status').value,beneficios:selectedBenefs,createdAt:new Date().toISOString()};
   if(isConnected){await fbAdd('employees',emp);}
   else{employees.push({...emp,id:Date.now()});ls_set('big_emp_v4',employees);renderAdmin();}
-  ['new-name','new-cpf','new-cargo','new-nascimento'].forEach(id=>document.getElementById(id).value='');
+  ['new-name','new-cpf','new-cargo','new-setor','new-nascimento'].forEach(id=>document.getElementById(id).value='');
   renderNewBenefToggles();
 }
 window.addEmployee=addEmployee;
@@ -1148,12 +1151,12 @@ window.clearHistory=clearHistory;window.closeModalLimpar=closeModalLimpar;window
 
 function exportCSV(){
   const f=getFiltered();if(!f.length){alert('Nenhum registro para exportar.');return;}
-  const cols=['Funcionário','CPF','Data de Nasc.','Idade','Cargo','Loja','Responsável Atendimento','Benefícios Utilizados','Nota Fiscal','Valor Compra (R$)','Valor c/ Desconto (R$)','Data','Hora','Observação'];
+  const cols=['Funcionário','CPF','Data de Nasc.','Idade','Cargo','Setor / Loja','Loja Compra','Responsável Atendimento','Benefícios Utilizados','Nota Fiscal','Valor Compra (R$)','Valor c/ Desconto (R$)','Data','Hora','Observação'];
   const sep=';';
   const esc=v=>{const s=String(v===null||v===undefined?'':v);return s.includes(sep)||s.includes('"')||s.includes('\n')?'"'+s.replace(/"/g,'""')+'"':s;};
   const rows=f.map(u=>{
     const emp=employees.find(e=>e.fbId===u.empId||String(e.id)===String(u.empId));
-    return[u.empNome,emp?emp.cpf||'':'',emp&&emp.nascimento?formatNasc(emp.nascimento):'',emp&&emp.nascimento?calcIdade(emp.nascimento):'',emp?emp.cargo||'':'',u.loja,u.responsavel||'',(u.tipos||[u.tipo]).join('; '),u.nf||'',u.valor?u.valor.toFixed(2).replace('.',','):'',u.desconto?u.desconto.toFixed(2).replace('.',','):'',u.data,u.hora,u.obs||''].map(esc).join(sep);
+    return[u.empNome,emp?emp.cpf||'':'',emp&&emp.nascimento?formatNasc(emp.nascimento):'',emp&&emp.nascimento?calcIdade(emp.nascimento):'',emp?emp.cargo||'':'',emp?emp.setor||'':'',u.loja,u.responsavel||'',(u.tipos||[u.tipo]).join('; '),u.nf||'',u.valor?u.valor.toFixed(2).replace('.',','):'',u.desconto?u.desconto.toFixed(2).replace('.',','):'',u.data,u.hora,u.obs||''].map(esc).join(sep);
   });
   const csv='\uFEFF'+cols.map(esc).join(sep)+'\r\n'+rows.join('\r\n');
   const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'});
