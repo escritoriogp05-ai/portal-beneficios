@@ -1,0 +1,1176 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Portal de Benefícios — BIG TRADING</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
+<style>
+:root{
+  --green-50:#E1F5EE;--green-100:#9FE1CB;--green-600:#1D9E75;--green-700:#0F6E56;--green-900:#085041;
+  --red-50:#FAECE7;--red-200:#F5C4B3;--red-600:#993C1D;--red-900:#4A1B0C;
+  --blue-50:#E6F1FB;--blue-100:#B5D4F4;--blue-600:#185FA5;--blue-900:#0C447C;
+  --amber-50:#FAEEDA;--amber-100:#FAC775;--amber-700:#854F0B;
+  --gray-50:#FAFAF8;--gray-100:#F4F4F2;--gray-200:#E8E8E4;--gray-400:#B4B2A9;--gray-700:#5F5E5A;--gray-900:#2C2C2A;
+  --radius:8px;--radius-lg:12px;--font:'Segoe UI',system-ui,sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font);background:#F7F7F5;color:var(--gray-900);min-height:100vh}
+.header{background:#fff;border-bottom:1px solid var(--gray-200);padding:0 2rem;display:flex;align-items:center;justify-content:space-between;height:60px;position:sticky;top:0;z-index:100}
+.header-logo{font-size:16px;font-weight:700;letter-spacing:.5px;color:var(--green-700);display:flex;align-items:center;gap:8px}
+.header-logo span{font-weight:400;color:var(--gray-700);font-size:13px}
+.container{max-width:900px;margin:0 auto;padding:2rem 1.5rem}
+.tabs{display:flex;gap:6px;margin-bottom:1.5rem;background:#fff;border:1px solid var(--gray-200);border-radius:var(--radius-lg);padding:6px}
+.tab{flex:1;padding:9px 16px;border-radius:var(--radius);border:none;background:transparent;cursor:pointer;font-size:14px;color:var(--gray-700);font-family:var(--font);transition:all .15s;display:flex;align-items:center;justify-content:center;gap:6px}
+.tab.active{background:var(--green-700);color:#fff;font-weight:500}
+.tab:not(.active):hover{background:var(--gray-100)}
+.section{display:none}.section.visible{display:block}
+.subtabs{display:flex;gap:6px;margin-bottom:1.25rem;flex-wrap:wrap}
+.subtab{padding:7px 14px;border-radius:var(--radius);border:1px solid var(--gray-200);background:#fff;cursor:pointer;font-size:13px;font-family:var(--font);color:var(--gray-700);display:flex;align-items:center;gap:5px}
+.subtab.active{background:var(--gray-900);color:#fff;border-color:var(--gray-900)}
+.subsection{display:none}.subsection.visible{display:block}
+.card{background:#fff;border:1px solid var(--gray-200);border-radius:var(--radius-lg);padding:1.25rem;margin-bottom:1rem}
+.card.found{border-color:var(--green-600);background:var(--green-50)}
+.card.not-found{border-color:var(--red-600);background:var(--red-50)}
+.stat-row{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:1.5rem}
+.stat{background:#fff;border:1px solid var(--gray-200);border-radius:var(--radius-lg);padding:.875rem 1rem}
+.stat-label{font-size:11px;color:var(--gray-700);margin-bottom:4px;text-transform:uppercase;letter-spacing:.5px}
+.stat-value{font-size:24px;font-weight:700;color:var(--gray-900)}
+input,select,textarea{padding:9px 12px;border-radius:var(--radius);border:1px solid var(--gray-200);background:#fff;font-size:14px;font-family:var(--font);color:var(--gray-900);width:100%}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--green-600);box-shadow:0 0 0 3px rgba(29,158,117,.1)}
+textarea{resize:vertical;min-height:60px}
+label{font-size:12px;color:var(--gray-700);display:block;margin-bottom:4px;font-weight:500}
+.form-row{display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap}
+.form-row>*{flex:1;min-width:120px}
+.btn{padding:9px 16px;border-radius:var(--radius);border:1px solid var(--gray-200);background:#fff;cursor:pointer;font-size:13px;font-family:var(--font);color:var(--gray-900);display:inline-flex;align-items:center;gap:6px;transition:all .15s;white-space:nowrap}
+.btn:hover{background:var(--gray-100)}.btn:disabled{opacity:.5;cursor:default}
+.btn-green{background:var(--green-600);color:#fff;border-color:var(--green-600);font-weight:500}
+.btn-green:hover{background:var(--green-700)}
+.btn-blue{background:var(--blue-50);color:var(--blue-900);border-color:var(--blue-100);font-weight:500}
+.btn-blue:hover{background:var(--blue-100)}
+.btn-red{color:var(--red-600);border-color:var(--red-200)}.btn-red:hover{background:var(--red-50)}
+.btn-full{width:100%;justify-content:center}.btn-sm{padding:5px 10px;font-size:12px}
+.badge{display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:99px;font-size:12px;font-weight:600}
+.badge.ativo{background:var(--green-50);color:var(--green-900);border:1px solid var(--green-100)}
+.badge.inativo{background:var(--red-50);color:var(--red-900);border:1px solid var(--red-200)}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:1rem}
+.chip{display:inline-flex;align-items:center;gap:6px;padding:5px 10px;border-radius:99px;font-size:13px;background:var(--gray-100);border:1px solid var(--gray-200)}
+.chip.green{background:var(--green-50);border-color:var(--green-100);color:var(--green-900)}
+.chip.blue{background:var(--blue-50);border-color:var(--blue-100);color:var(--blue-900)}
+.chip button{background:none;border:none;cursor:pointer;color:var(--gray-400);font-size:16px;padding:0;line-height:1}
+.chip button:hover{color:var(--red-600)}
+.benef-toggle-list{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px}
+.benef-toggle{display:flex;align-items:center;gap:6px;padding:6px 14px;border-radius:99px;border:1.5px solid var(--gray-200);background:var(--gray-100);cursor:pointer;font-size:13px;font-family:var(--font);color:var(--gray-700);transition:all .15s;user-select:none}
+.benef-toggle.on{background:var(--green-50);border-color:var(--green-600);color:var(--green-900);font-weight:600}
+.benef-toggle:hover{border-color:var(--green-600)}
+.emp-card{border:1px solid var(--gray-200);border-radius:var(--radius-lg);margin-bottom:8px;overflow:hidden;background:#fff}
+.emp-card-header{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;cursor:pointer;transition:background .12s;gap:12px}
+.emp-card-header:hover,.emp-card.expanded .emp-card-header{background:var(--gray-50)}
+.emp-card-body{display:none;padding:16px;border-top:1px solid var(--gray-100)}
+.emp-card-body.open{display:block}
+.chevron{transition:transform .2s;font-size:16px;color:var(--gray-400);flex-shrink:0}
+.emp-card.expanded .chevron{transform:rotate(180deg)}
+.benef-emp-tags{display:flex;flex-wrap:wrap;gap:4px;margin-top:5px}
+.benef-emp-tag{display:inline-flex;align-items:center;gap:3px;padding:2px 9px;border-radius:99px;font-size:11px;font-weight:600;background:var(--green-50);color:var(--green-900);border:1px solid var(--green-100)}
+.benef-emp-tag.none{background:var(--amber-50);color:var(--amber-700);border-color:var(--amber-100)}
+.benef-section-label{font-size:11px;font-weight:700;color:var(--gray-700);text-transform:uppercase;letter-spacing:.6px;margin-bottom:8px}
+.uso-item{padding:10px 14px;border-radius:var(--radius);background:var(--gray-100);margin-bottom:6px}
+.uso-item-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px}
+.uso-nome{font-weight:600;font-size:14px}
+.uso-data{font-size:11px;color:var(--gray-700)}
+.uso-detalhe{font-size:12px;color:var(--gray-700);display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.tag{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:99px;font-size:11px;font-weight:600}
+.tag.loja{background:var(--blue-50);color:var(--blue-900)}
+.tag.benef{background:var(--green-50);color:var(--green-900)}
+.tag.valor{background:var(--amber-50);color:var(--amber-700)}
+/* Multi-select benefícios */
+.benef-select-list{display:flex;flex-wrap:wrap;gap:8px;margin-top:4px}
+.benef-select-item{display:flex;align-items:center;gap:6px;padding:7px 14px;border-radius:99px;border:1.5px solid var(--gray-200);background:var(--gray-100);cursor:pointer;font-size:13px;font-family:var(--font);color:var(--gray-700);transition:all .15s;user-select:none}
+.benef-select-item.selected{background:var(--green-50);border-color:var(--green-600);color:var(--green-900);font-weight:600}
+.benef-select-item:hover{border-color:var(--green-600)}
+.info-bar{padding:10px 14px;border-radius:var(--radius);background:var(--gray-100);font-size:13px;color:var(--gray-700);margin-bottom:1rem;display:flex;align-items:center;gap:8px;border:1px solid var(--gray-200)}
+.success-msg{background:var(--green-50);border:1px solid var(--green-100);border-radius:var(--radius);padding:10px 14px;font-size:13px;color:var(--green-900);margin-top:8px;display:flex;align-items:center;gap:8px}
+.warn-bar{background:var(--amber-50);border:1px solid var(--amber-100);border-radius:var(--radius);padding:10px 14px;font-size:13px;color:var(--amber-700);margin-top:10px;display:flex;align-items:center;gap:8px}
+.section-title{font-size:11px;font-weight:700;color:var(--gray-700);margin-bottom:10px;text-transform:uppercase;letter-spacing:.7px}
+.empty{text-align:center;padding:2.5rem;color:var(--gray-400);font-size:14px}
+.filter-row{display:flex;gap:8px;margin-bottom:1rem;flex-wrap:wrap}
+.filter-row>*{flex:1;min-width:130px}
+.hist-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:.875rem;flex-wrap:wrap;gap:8px}
+.avatar{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:15px;flex-shrink:0}
+.uso-form-box{margin-top:1rem;padding-top:1rem;border-top:1px solid var(--green-100)}
+.uso-form-title{font-size:12px;color:var(--green-700);margin-bottom:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;display:flex;align-items:center;gap:5px}
+.search-wrap{position:relative;margin-bottom:.5rem}
+.search-wrap .si{position:absolute;left:12px;top:50%;transform:translateY(-50%);font-size:18px;color:var(--gray-400)}
+.search-wrap input{padding-left:40px;font-size:15px;height:46px}
+.cpf-hint{font-size:12px;color:var(--gray-400);margin-bottom:16px;padding-left:2px}
+.lock-screen{display:flex;align-items:center;justify-content:center;min-height:300px}
+.lock-box{background:#fff;border:1px solid var(--gray-200);border-radius:var(--radius-lg);padding:2rem;width:100%;max-width:360px;text-align:center}
+.lock-icon{font-size:36px;color:var(--green-600);margin-bottom:1rem;display:block}
+.lock-box h3{margin-bottom:.5rem;font-size:17px}
+.lock-box p{font-size:13px;color:var(--gray-700);margin-bottom:1.25rem}
+.lock-box input{margin-bottom:10px}
+.lock-error{color:var(--red-600);font-size:13px;margin-top:6px}
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:200;align-items:center;justify-content:center}
+.modal-overlay.open{display:flex}
+.modal{background:#fff;border-radius:var(--radius-lg);padding:1.5rem;width:100%;max-width:440px;margin:1rem;max-height:90vh;overflow-y:auto}
+.modal h3{font-size:16px;margin-bottom:1rem;display:flex;align-items:center;gap:8px}
+.modal-footer{display:flex;gap:8px;justify-content:flex-end;margin-top:1.25rem}
+/* Loading overlay */
+.loading-overlay{display:none;position:fixed;inset:0;background:rgba(255,255,255,.8);z-index:300;align-items:center;justify-content:center;flex-direction:column;gap:12px}
+.loading-overlay.open{display:flex}
+.spinner{width:40px;height:40px;border:3px solid var(--gray-200);border-top-color:var(--green-600);border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+/* Config banner */
+.config-banner{background:#FFF3CD;border:1px solid #FFC107;border-radius:var(--radius-lg);padding:1.25rem;margin-bottom:1.5rem}
+.config-banner h3{color:#856404;font-size:15px;margin-bottom:.5rem;display:flex;align-items:center;gap:6px}
+.config-banner p{color:#856404;font-size:13px;margin-bottom:.75rem}
+.config-banner code{background:#fff;padding:2px 6px;border-radius:4px;font-size:12px;border:1px solid #FFC107}
+.sync-dot{width:8px;height:8px;border-radius:50%;background:var(--green-600);display:inline-block;margin-right:4px}
+.sync-dot.off{background:var(--gray-400)}
+@media(max-width:600px){
+  .stat-row{grid-template-columns:1fr 1fr}
+  .container{padding:1rem}
+  .header{padding:0 1rem}
+}
+</style>
+</head>
+<body>
+
+<!-- Loading overlay -->
+<div class="loading-overlay" id="loading">
+  <div class="spinner"></div>
+  <div style="font-size:14px;color:var(--gray-700)">Carregando dados...</div>
+</div>
+
+<div class="header">
+  <div class="header-logo">
+    <i class="ti ti-building-store"></i>
+    BIG TRADING
+    <span>— Portal de Benefícios</span>
+  </div>
+  <div style="display:flex;align-items:center;gap:10px">
+    <div style="font-size:12px;color:var(--gray-400);display:flex;align-items:center" id="sync-status">
+      <span class="sync-dot off" id="sync-dot"></span><span id="sync-label">Conectando...</span>
+    </div>
+    <div style="font-size:12px;color:var(--gray-400)" id="header-date"></div>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- CONFIG BANNER — aparece se Firebase não estiver configurado -->
+  <div class="config-banner" id="config-banner" style="display:none">
+    <h3><i class="ti ti-alert-triangle"></i> Configure o Firebase para sincronizar os dados</h3>
+    <p>Substitua as credenciais abaixo no código (<code>SEU_API_KEY</code>, <code>SEU_PROJECT_ID</code>, etc.) pelas credenciais do seu projeto Firebase. Veja as instruções no arquivo README incluso.</p>
+    <button class="btn btn-sm" style="background:#856404;color:#fff;border-color:#856404" onclick="document.getElementById('config-banner').style.display='none'">Entendi</button>
+  </div>
+
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('consulta',this)"><i class="ti ti-search"></i> Consulta de Benefícios</button>
+    <button class="tab" onclick="switchTab('admin',this)"><i class="ti ti-lock"></i> Painel Admin</button>
+  </div>
+
+  <!-- CONSULTA -->
+  <div id="consulta" class="section visible">
+    <div class="info-bar"><i class="ti ti-id-badge"></i> Digite o CPF completo do funcionário para verificar o benefício.</div>
+    <div class="search-wrap">
+      <i class="ti ti-id-badge si"></i>
+      <input type="text" id="search-input" placeholder="Digite o CPF (somente números ou formatado)..." oninput="searchEmployee()" maxlength="14">
+    </div>
+    <div class="cpf-hint">Ex: 123.456.789-00 ou 12345678900</div>
+    <div id="search-result"></div>
+  </div>
+
+  <!-- ADMIN -->
+  <div id="admin" class="section">
+    <div id="lock-screen" class="lock-screen">
+      <div class="lock-box">
+        <i class="ti ti-lock lock-icon"></i>
+        <h3>Acesso Restrito</h3>
+        <p>Digite a senha para acessar o painel administrativo.</p>
+        <input type="password" id="senha-input" placeholder="Senha..." onkeydown="if(event.key==='Enter')checkSenha()">
+        <button class="btn btn-green btn-full" style="margin-top:4px" onclick="checkSenha()"><i class="ti ti-login"></i> Entrar</button>
+        <div id="lock-error" class="lock-error"></div>
+      </div>
+    </div>
+
+    <div id="admin-content" style="display:none">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.25rem;flex-wrap:wrap;gap:8px">
+        <div style="font-size:13px;color:var(--gray-700)">Bem-vinda, <strong>Admin</strong></div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap">
+          <button class="btn btn-sm btn-blue" onclick="openSenhaModal()"><i class="ti ti-key"></i> Alterar senha</button>
+          <button class="btn btn-sm btn-red" onclick="logout()"><i class="ti ti-logout"></i> Sair</button>
+        </div>
+      </div>
+
+      <div class="stat-row">
+        <div class="stat"><div class="stat-label">Funcionários</div><div class="stat-value" id="stat-total">0</div></div>
+        <div class="stat"><div class="stat-label">Ativos</div><div class="stat-value" id="stat-ativos" style="color:var(--green-700)">0</div></div>
+        <div class="stat"><div class="stat-label">Inativos</div><div class="stat-value" id="stat-inativos" style="color:var(--red-600)">0</div></div>
+        <div class="stat"><div class="stat-label">Usos (mês)</div><div class="stat-value" id="stat-usos" style="color:var(--blue-600)">0</div></div>
+      </div>
+
+      <div class="subtabs">
+        <button class="subtab active" onclick="switchSub('s-func',this)"><i class="ti ti-users"></i> Funcionários</button>
+        <button class="subtab" onclick="switchSub('s-benef',this)"><i class="ti ti-gift"></i> Benefícios e Lojas</button>
+        <button class="subtab" onclick="switchSub('s-hist',this)"><i class="ti ti-history"></i> Histórico</button>
+      </div>
+
+      <!-- FUNCIONÁRIOS -->
+      <div id="s-func" class="subsection visible">
+        <div class="card">
+          <div class="section-title">Funcionários — clique para expandir e editar</div>
+          <div id="emp-list"></div>
+        </div>
+        <div class="card">
+          <div class="section-title">Adicionar funcionário</div>
+          <div class="form-row">
+            <div style="flex:2;min-width:180px"><label>Nome completo *</label><input type="text" id="new-name" placeholder="Ex: Maria Silva"></div>
+            <div><label>CPF</label><input type="text" id="new-cpf" placeholder="000.000.000-00"></div>
+          </div>
+          <div class="form-row">
+            <div><label>Cargo</label><input type="text" id="new-cargo" placeholder="Ex: Vendedora"></div>
+            <div><label>Data de nascimento</label><input type="date" id="new-nascimento"></div>
+            <div><label>Status</label><select id="new-status"><option value="ativo">Ativo</option><option value="inativo">Inativo</option></select></div>
+          </div>
+          <div style="margin-bottom:14px">
+            <label>Benefícios autorizados</label>
+            <div class="benef-toggle-list" id="new-benef-toggles"></div>
+          </div>
+          <button class="btn btn-green" onclick="addEmployee()"><i class="ti ti-plus"></i> Adicionar funcionário</button>
+        </div>
+      </div>
+
+      <!-- BENEFÍCIOS E LOJAS -->
+      <div id="s-benef" class="subsection">
+        <div class="card">
+          <div class="section-title">Tipos de benefício — clique para configurar limite</div>
+          <div id="benef-list"></div>
+          <div style="border-top:.5px solid var(--gray-200);padding-top:1rem;margin-top:.5rem">
+            <div class="section-title">Adicionar benefício</div>
+            <div class="form-row">
+              <div style="flex:2"><label>Nome do benefício *</label><input type="text" id="new-benef" placeholder="Ex: 30% desconto Havaianas"></div>
+            </div>
+            <div class="form-row">
+              <div>
+                <label>Tem limite de uso?</label>
+                <select id="new-benef-tem-limite" onchange="toggleNewBenefLimite()">
+                  <option value="nao">Não (ilimitado)</option>
+                  <option value="sim">Sim</option>
+                </select>
+              </div>
+            </div>
+            <div id="new-benef-limite-campos" style="display:none">
+              <div class="form-row">
+                <div>
+                  <label>Quantidade de usos permitidos</label>
+                  <input type="number" id="new-benef-vezes" value="1" min="1" placeholder="Ex: 1">
+                </div>
+                <div>
+                  <label>Período</label>
+                  <select id="new-benef-periodo">
+                    <option value="mes">Por mês</option>
+                    <option value="trimestre">Por trimestre (3 meses)</option>
+                    <option value="semestre">Por semestre (6 meses)</option>
+                    <option value="ano">Por ano</option>
+                    <option value="aniversario">Aniversário (mês + 15 dias)</option>
+                  </select>
+                </div>
+                <div>
+                  <label>Tipo de bloqueio</label>
+                  <select id="new-benef-bloqueio">
+                    <option value="total">Bloqueia completamente</option>
+                    <option value="parcial">Bloqueia só este, libera os demais</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+            <button class="btn btn-green" onclick="addBenef()"><i class="ti ti-plus"></i> Adicionar benefício</button>
+          </div>
+        </div>
+        <div class="card">
+          <div class="section-title">Lojas cadastradas</div>
+          <div class="chips" id="loja-chips"></div>
+          <div class="form-row">
+            <input type="text" id="new-loja" placeholder="Nome da loja (ex: Loja Shopping)">
+            <button class="btn btn-green" style="flex:0" onclick="addLoja()"><i class="ti ti-plus"></i> Adicionar</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- HISTÓRICO -->
+      <div id="s-hist" class="subsection">
+        <div class="card">
+          <div class="hist-header">
+            <div class="section-title" style="margin:0">Registros de uso</div>
+            <div style="display:flex;gap:6px">
+              <button class="btn btn-blue btn-sm" onclick="exportCSV()"><i class="ti ti-file-spreadsheet"></i> Exportar Excel</button>
+              <button class="btn btn-red btn-sm" onclick="clearHistory()"><i class="ti ti-trash"></i> Limpar</button>
+            </div>
+          </div>
+          <div class="filter-row">
+            <input type="text" id="filt-nome" placeholder="Filtrar por nome..." oninput="renderHistorico()" style="font-size:13px">
+            <select id="filt-loja" onchange="renderHistorico()" style="font-size:13px"><option value="">Todas as lojas</option></select>
+            <select id="filt-benef" onchange="renderHistorico()" style="font-size:13px"><option value="">Todos os benefícios</option></select>
+            <input type="month" id="filt-mes" onchange="renderHistorico()" style="font-size:13px">
+          </div>
+          <div id="uso-list"></div>
+          <div id="export-status" style="margin-top:8px"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL EDITAR LIMITE BENEFÍCIO -->
+<div class="modal-overlay" id="modal-benef-limite">
+  <div class="modal">
+    <h3><i class="ti ti-settings" style="color:var(--green-600)"></i> Configurar limite de uso</h3>
+    <input type="hidden" id="edit-benef-idx">
+    <div style="margin-bottom:10px"><label>Benefício</label><input type="text" id="edit-benef-nome" disabled style="background:var(--gray-100)"></div>
+    <div style="margin-bottom:10px">
+      <label>Tem limite de uso?</label>
+      <select id="edit-benef-tem-limite" onchange="toggleEditBenefLimite()">
+        <option value="nao">Não (ilimitado)</option>
+        <option value="sim">Sim</option>
+      </select>
+    </div>
+    <div id="edit-benef-limite-campos">
+      <div class="form-row">
+        <div><label>Quantidade de usos</label><input type="number" id="edit-benef-vezes" value="1" min="1"></div>
+        <div>
+          <label>Período</label>
+          <select id="edit-benef-periodo">
+            <option value="mes">Por mês</option>
+            <option value="trimestre">Por trimestre (3 meses)</option>
+            <option value="semestre">Por semestre (6 meses)</option>
+            <option value="ano">Por ano</option>
+            <option value="aniversario">Aniversário (mês + 15 dias)</option>
+          </select>
+        </div>
+      </div>
+      <div style="margin-bottom:10px">
+        <label>Tipo de bloqueio</label>
+        <select id="edit-benef-bloqueio">
+          <option value="total">Bloqueia completamente</option>
+          <option value="parcial">Bloqueia só este, libera os demais</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" onclick="closeModalBenefLimite()">Cancelar</button>
+      <button class="btn btn-green" onclick="salvarLimiteBenef()"><i class="ti ti-check"></i> Salvar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL SENHA LIMPAR HISTÓRICO -->
+<div class="modal-overlay" id="modal-limpar">
+  <div class="modal">
+    <h3><i class="ti ti-trash" style="color:var(--red-600)"></i> Limpar histórico de uso</h3>
+    <p style="font-size:13px;color:var(--gray-700);margin-bottom:1rem">Esta ação é irreversível. Digite a senha do admin para confirmar.</p>
+    <div style="margin-bottom:6px"><label>Senha *</label><input type="password" id="limpar-senha" placeholder="Digite a senha..." onkeydown="if(event.key==='Enter')confirmarLimpar()"></div>
+    <div id="limpar-erro" style="color:var(--red-600);font-size:13px;margin-top:6px;min-height:18px"></div>
+    <div class="modal-footer">
+      <button class="btn" onclick="closeModalLimpar()">Cancelar</button>
+      <button class="btn btn-red" onclick="confirmarLimpar()"><i class="ti ti-trash"></i> Limpar histórico</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL ALTERAR SENHA -->
+<div class="modal-overlay" id="modal-senha">
+  <div class="modal">
+    <h3><i class="ti ti-key" style="color:var(--blue-600)"></i> Alterar senha do Admin</h3>
+    <div style="margin-bottom:10px"><label>Senha atual</label><input type="password" id="senha-atual" placeholder="Senha atual"></div>
+    <div style="margin-bottom:10px"><label>Nova senha</label><input type="password" id="senha-nova" placeholder="Nova senha"></div>
+    <div style="margin-bottom:6px"><label>Confirmar nova senha</label><input type="password" id="senha-confirma" placeholder="Confirme a nova senha"></div>
+    <div id="senha-erro" style="color:var(--red-600);font-size:13px;margin-top:6px;min-height:18px"></div>
+    <div class="modal-footer">
+      <button class="btn" onclick="closeSenhaModal()">Cancelar</button>
+      <button class="btn btn-green" onclick="salvarSenha()"><i class="ti ti-check"></i> Salvar senha</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL EDITAR FUNCIONÁRIO -->
+<div class="modal-overlay" id="modal-edit">
+  <div class="modal">
+    <h3><i class="ti ti-user-edit" style="color:var(--green-600)"></i> Editar dados do funcionário</h3>
+    <input type="hidden" id="edit-id">
+    <div class="form-row">
+      <div style="flex:2;min-width:180px"><label>Nome completo *</label><input type="text" id="edit-name" placeholder="Nome completo"></div>
+      <div><label>CPF</label><input type="text" id="edit-cpf" placeholder="000.000.000-00"></div>
+    </div>
+    <div class="form-row">
+      <div><label>Cargo</label><input type="text" id="edit-cargo" placeholder="Cargo"></div>
+      <div><label>Data de nascimento</label><input type="date" id="edit-nascimento"></div>
+    </div>
+    <div style="margin-bottom:10px"><label>Status</label>
+      <select id="edit-status"><option value="ativo">Ativo</option><option value="inativo">Inativo</option></select>
+    </div>
+    <div id="edit-erro" style="color:var(--red-600);font-size:13px;min-height:18px"></div>
+    <div class="modal-footer">
+      <button class="btn" onclick="closeEditModal()">Cancelar</button>
+      <button class="btn btn-green" onclick="salvarEdicao()"><i class="ti ti-check"></i> Salvar alterações</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════
+     FIREBASE SDK
+════════════════════════════════════════════════════ -->
+<script type="module">
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+import { getFirestore, collection, doc, getDocs, setDoc, addDoc, deleteDoc, updateDoc, onSnapshot, query, orderBy, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+
+// ══════════════════════════════════════════════════
+//  🔧 COLE AQUI AS SUAS CREDENCIAIS DO FIREBASE
+// ══════════════════════════════════════════════════
+const firebaseConfig = {
+  apiKey: "AIzaSyAFgj2NPKrfd8HaYwanGrHIV1XaNcoCqOY",
+  authDomain: "big-trading-beneficios.firebaseapp.com",
+  projectId: "big-trading-beneficios",
+  storageBucket: "big-trading-beneficios.firebasestorage.app",
+  messagingSenderId: "68320224492",
+  appId: "1:68320224492:web:695683975l3856654271c9"
+};
+// ══════════════════════════════════════════════════
+
+const CONFIGURED = !firebaseConfig.apiKey.includes('SEU_');
+
+let app, db;
+let employees=[], usos=[], beneficios=[], lojas=[];
+let adminSenha = '1234';
+let isConnected = false;
+
+// ══════════════════════════════════════════════════
+// SISTEMA DE LIMITES DINÂMICO (gerenciado pelo admin)
+// beneficios = array de objetos: { nome, limite: {ativo,vezes,periodo,bloqueio} }
+// ══════════════════════════════════════════════════
+function getBenefNome(b){ return typeof b==='string'?b:b.nome; }
+function getBenefLimite(b){ if(typeof b==='string')return null; return b.limite&&b.limite.ativo?b.limite:null; }
+function getBenefObj(nome){ return beneficios.find(b=>getBenefNome(b)===nome); }
+
+const PERIODO_LABEL = { mes:'mês', trimestre:'trimestre', semestre:'semestre', ano:'ano', aniversario:'aniversário' };
+
+function verificarLimiteBeneficio(empId, empNascimento, benefNome) {
+  const bobj = getBenefObj(benefNome);
+  const limite = bobj ? getBenefLimite(bobj) : null;
+  if (!limite) return { bloqueado: false };
+
+  const now = new Date();
+  const bloqueioTotal = limite.bloqueio !== 'parcial';
+
+  const usosEmp = usos.filter(u => {
+    const mesmoEmp = u.empId===empId || String(u.empId)===String(empId);
+    const temBenef = (u.tipos||[u.tipo]).some(t=>t===benefNome);
+    return mesmoEmp && temBenef;
+  });
+
+  if (limite.periodo === 'mes') {
+    const count = usosEmp.filter(u=>{const d=new Date(u.ts);return d.getMonth()===now.getMonth()&&d.getFullYear()===now.getFullYear();}).length;
+    if (count >= limite.vezes) return { bloqueado:true, bloqueioTotal };
+  }
+  if (limite.periodo === 'trimestre' || limite.periodo === 'semestre') {
+    const meses = limite.periodo==='trimestre'?3:6;
+    const desde = new Date(now); desde.setMonth(desde.getMonth()-meses);
+    const recentes = usosEmp.filter(u=>new Date(u.ts)>=desde);
+    if (recentes.length >= limite.vezes) {
+      const prox = new Date(recentes[0].ts); prox.setMonth(prox.getMonth()+meses);
+      return { bloqueado:true, bloqueioTotal:true, proximo:prox.toLocaleDateString('pt-BR') };
+    }
+  }
+  if (limite.periodo === 'ano') {
+    const count = usosEmp.filter(u=>new Date(u.ts).getFullYear()===now.getFullYear()).length;
+    if (count >= limite.vezes) return { bloqueado:true, bloqueioTotal:true };
+  }
+  if (limite.periodo === 'aniversario') {
+    if (!empNascimento) return { bloqueado:false };
+    const nasc = new Date(empNascimento+'T00:00:00');
+    const mesAniv = nasc.getMonth();
+    const anoAtual = now.getFullYear();
+    const ini = new Date(anoAtual, mesAniv, 1);
+    const fim = new Date(anoAtual, mesAniv+1, 0); fim.setDate(fim.getDate()+15);
+    const usosAno = usosEmp.filter(u=>new Date(u.ts).getFullYear()===anoAtual);
+    if (usosAno.length >= limite.vezes) return { bloqueado:true, bloqueioTotal:true, msg:'Voucher aniversariante já utilizado este ano.' };
+    if (now < ini || now > fim) {
+      const mesNome = ini.toLocaleDateString('pt-BR',{month:'long'});
+      return { bloqueado:true, bloqueioTotal:true, msg:`Válido apenas em ${mesNome} ou até 15 dias após.` };
+    }
+  }
+  return { bloqueado:false };
+}
+
+// Fallback localStorage quando Firebase não configurado
+function ls_get(k,def){try{const v=localStorage.getItem(k);return v?JSON.parse(v):def;}catch{return def;}}
+function ls_set(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch{}}
+
+// ── INIT ──
+async function init() {
+  document.getElementById('header-date').textContent = new Date().toLocaleDateString('pt-BR',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+
+  if (!CONFIGURED) {
+    document.getElementById('config-banner').style.display = 'block';
+    setSyncStatus(false, 'Firebase não configurado');
+    // Carrega do localStorage como fallback
+    employees = ls_get('big_emp_v4', []);
+    usos       = ls_get('big_uso_v4', []);
+    beneficios = ls_get('big_benef_v4', ['Alimentação','Farmácia','Transporte','Saúde','Vale-compras','Outros']);
+    lojas      = ls_get('big_loja_v4', ['Loja Centro','Loja Shopping','Loja Norte']);
+    adminSenha = ls_get('big_senha_v4', '1234');
+    hideLoading();
+    if(ls_get('big_auth_v4',false)) showAdminContent();
+    return;
+  }
+
+  showLoading();
+  try {
+    app = initializeApp(firebaseConfig);
+    db  = getFirestore(app);
+    setSyncStatus(true, 'Conectado');
+    isConnected = true;
+
+    // Listeners em tempo real
+    onSnapshot(collection(db,'employees'), snap => {
+      employees = snap.docs.map(d=>({fbId:d.id,...d.data()}));
+      renderIfAdmin();
+    });
+    onSnapshot(collection(db,'usos'), snap => {
+      usos = snap.docs.map(d=>({fbId:d.id,...d.data()})).sort((a,b)=>new Date(b.ts)-new Date(a.ts));
+      renderIfAdmin();
+    });
+    onSnapshot(doc(db,'config','settings'), snap => {
+      if(snap.exists()){
+        const d=snap.data();
+        beneficios = d.beneficios || [];
+        lojas      = d.lojas      || [];
+        adminSenha = d.adminSenha || '1234';
+      }
+      renderIfAdmin();
+    });
+
+    hideLoading();
+    if(ls_get('big_auth_v4',false)) showAdminContent();
+
+  } catch(e) {
+    console.error(e);
+    setSyncStatus(false,'Erro de conexão');
+    hideLoading();
+    alert('Erro ao conectar ao Firebase. Verifique as credenciais.');
+  }
+}
+
+function setSyncStatus(ok, label){
+  document.getElementById('sync-dot').className = 'sync-dot'+(ok?'':' off');
+  document.getElementById('sync-label').textContent = label;
+}
+function showLoading(){document.getElementById('loading').classList.add('open');}
+function hideLoading(){document.getElementById('loading').classList.remove('open');}
+function renderIfAdmin(){if(ls_get('big_auth_v4',false)){renderAdmin();}}
+
+// ── FIRESTORE HELPERS ──
+async function fbSet(col, id, data){
+  if(!isConnected)return;
+  await setDoc(doc(db,col,id), data);
+}
+async function fbAdd(col, data){
+  if(!isConnected)return null;
+  const ref = await addDoc(collection(db,col), data);
+  return ref.id;
+}
+async function fbUpdate(col, id, data){
+  if(!isConnected)return;
+  await updateDoc(doc(db,col,id), data);
+}
+async function fbDelete(col, id){
+  if(!isConnected)return;
+  await deleteDoc(doc(db,col,id));
+}
+async function fbSaveSettings(){
+  if(!isConnected){ ls_set('big_benef_v4',beneficios); ls_set('big_loja_v4',lojas); ls_set('big_senha_v4',adminSenha); return; }
+  await setDoc(doc(db,'config','settings'),{beneficios,lojas,adminSenha});
+}
+
+// ── UTILS ──
+function initials(n){const p=n.trim().split(' ');return(p[0][0]+(p[1]?.[0]||'')).toUpperCase();}
+function formatNasc(n){if(!n)return'';const[y,m,d]=n.split('-');return`${d}/${m}/${y}`;}
+function calcIdade(n){
+  if(!n)return null;
+  const hoje=new Date(),dn=new Date(n+'T00:00:00');
+  let i=hoje.getFullYear()-dn.getFullYear();
+  const m=hoje.getMonth()-dn.getMonth();
+  if(m<0||(m===0&&hoje.getDate()<dn.getDate()))i--;
+  return i;
+}
+function anivHoje(n){if(!n)return false;const h=new Date(),d=new Date(n+'T00:00:00');return h.getDate()===d.getDate()&&h.getMonth()===d.getMonth();}
+function empBenefs(e){return Array.isArray(e.beneficios)?e.beneficios:[];}
+function cleanCPF(s){return(s||'').replace(/\D/g,'');}
+function formatValor(v){if(!v&&v!==0)return'';return'R$ '+parseFloat(v).toFixed(2).replace('.',',');}
+
+// ── NAVEGAÇÃO ──
+function switchTab(tab,btn){
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('visible'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById(tab).classList.add('visible');btn.classList.add('active');
+  if(tab==='admin'&&ls_get('big_auth_v4',false))renderAdmin();
+  if(tab==='consulta'){document.getElementById('search-result').innerHTML='';document.getElementById('search-input').value='';}
+}
+function switchSub(sub,btn){
+  document.querySelectorAll('.subsection').forEach(s=>s.classList.remove('visible'));
+  document.querySelectorAll('.subtab').forEach(t=>t.classList.remove('active'));
+  document.getElementById(sub).classList.add('visible');btn.classList.add('active');
+  if(sub==='s-hist')renderHistorico();
+  if(sub==='s-benef')renderBenef();
+  if(sub==='s-func'){renderEmpList();renderNewBenefToggles();}
+}
+window.switchTab=switchTab; window.switchSub=switchSub;
+
+// ── AUTH ──
+function checkSenha(){
+  if(document.getElementById('senha-input').value===adminSenha){ls_set('big_auth_v4',true);showAdminContent();}
+  else document.getElementById('lock-error').textContent='Senha incorreta. Tente novamente.';
+}
+function showAdminContent(){
+  document.getElementById('lock-screen').style.display='none';
+  document.getElementById('admin-content').style.display='block';
+  renderAdmin(); renderNewBenefToggles();
+}
+function logout(){
+  ls_set('big_auth_v4',false);
+  document.getElementById('lock-screen').style.display='flex';
+  document.getElementById('admin-content').style.display='none';
+  document.getElementById('senha-input').value='';
+  document.getElementById('lock-error').textContent='';
+}
+window.checkSenha=checkSenha; window.logout=logout;
+
+// ── MODAL SENHA ──
+function openSenhaModal(){['senha-atual','senha-nova','senha-confirma'].forEach(id=>document.getElementById(id).value='');document.getElementById('senha-erro').textContent='';document.getElementById('modal-senha').classList.add('open');}
+function closeSenhaModal(){document.getElementById('modal-senha').classList.remove('open');}
+async function salvarSenha(){
+  const atual=document.getElementById('senha-atual').value;
+  const nova=document.getElementById('senha-nova').value.trim();
+  const confirma=document.getElementById('senha-confirma').value.trim();
+  const err=document.getElementById('senha-erro');
+  if(atual!==adminSenha){err.textContent='Senha atual incorreta.';return;}
+  if(!nova){err.textContent='Nova senha não pode ser vazia.';return;}
+  if(nova!==confirma){err.textContent='As senhas não coincidem.';return;}
+  adminSenha=nova;
+  await fbSaveSettings();
+  closeSenhaModal();
+  alert('✅ Senha alterada com sucesso!');
+}
+window.openSenhaModal=openSenhaModal; window.closeSenhaModal=closeSenhaModal; window.salvarSenha=salvarSenha;
+
+// ── MODAL EDITAR FUNCIONÁRIO ──
+function openEditModal(id){
+  const e=employees.find(x=>x.id===id||x.fbId===id);if(!e)return;
+  document.getElementById('edit-id').value=e.fbId||e.id;
+  document.getElementById('edit-name').value=e.nome;
+  document.getElementById('edit-cpf').value=e.cpf||'';
+  document.getElementById('edit-cargo').value=e.cargo||'';
+  document.getElementById('edit-nascimento').value=e.nascimento||'';
+  document.getElementById('edit-status').value=e.status;
+  document.getElementById('edit-erro').textContent='';
+  document.getElementById('modal-edit').classList.add('open');
+}
+function closeEditModal(){document.getElementById('modal-edit').classList.remove('open');}
+async function salvarEdicao(){
+  const fid=document.getElementById('edit-id').value;
+  const nome=document.getElementById('edit-name').value.trim();
+  if(!nome){document.getElementById('edit-erro').textContent='Nome é obrigatório.';return;}
+  const upd={nome,cpf:document.getElementById('edit-cpf').value.trim(),cargo:document.getElementById('edit-cargo').value.trim(),nascimento:document.getElementById('edit-nascimento').value,status:document.getElementById('edit-status').value};
+  if(isConnected){
+    await fbUpdate('employees',fid,upd);
+  } else {
+    const e=employees.find(x=>String(x.id)===String(fid)||x.fbId===fid);
+    if(e)Object.assign(e,upd);
+    ls_set('big_emp_v4',employees);
+    renderAdmin();
+  }
+  closeEditModal();
+}
+window.openEditModal=openEditModal; window.closeEditModal=closeEditModal; window.salvarEdicao=salvarEdicao;
+
+// ── CONSULTA (somente CPF completo) ──
+function searchEmployee(){
+  const raw=document.getElementById('search-input').value.trim();
+  const c=document.getElementById('search-result');
+  const q=cleanCPF(raw);
+  if(q.length<11){c.innerHTML='';return;}
+  const e=employees.find(x=>cleanCPF(x.cpf)===q);
+  if(!e){
+    c.innerHTML=`<div class="card not-found"><div style="display:flex;align-items:center;gap:14px">
+      <div class="avatar" style="background:var(--red-200);color:var(--red-900)"><i class="ti ti-user-off" style="font-size:20px"></i></div>
+      <div><div style="font-size:15px;font-weight:600;color:var(--red-900)">CPF não encontrado</div>
+      <div style="font-size:13px;color:var(--red-600);margin-top:2px">Nenhum colaborador com este CPF. Em caso de dúvida, contate o RH.</div></div></div></div>`;
+    return;
+  }
+  const bs=empBenefs(e);
+  const isAtivo=e.status==='ativo';
+  const gc=isAtivo?'var(--green-900)':'var(--red-900)';
+  const gs=isAtivo?'var(--green-700)':'var(--red-600)';
+  const eid=e.fbId||e.id;
+  const ne=e.nome.replace(/'/g,"\\'");
+  c.innerHTML=`<div class="card ${isAtivo?'found':'not-found'}">
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">
+      <div style="display:flex;align-items:center;gap:14px">
+        <div class="avatar" style="background:${isAtivo?'#9FE1CB':'var(--red-200)'};color:${gc}">${initials(e.nome)}</div>
+        <div>
+          <div style="font-size:16px;font-weight:700;color:${gc}">${e.nome}${anivHoje(e.nascimento)?' 🎂':''}</div>
+          <div style="font-size:13px;color:${gs};margin-top:2px">${e.cargo||''}${e.cpf?' · '+e.cpf:''}${e.nascimento?' · Nasc. '+formatNasc(e.nascimento):''}</div>
+        </div>
+      </div>
+      <span class="badge ${e.status}"><i class="ti ti-${isAtivo?'check':'x'}"></i> ${isAtivo?'Benefício Ativo':'Benefício Inativo'}</span>
+    </div>
+    ${isAtivo ? (bs.length===0
+      ? `<div class="warn-bar"><i class="ti ti-alert-triangle"></i> Nenhum benefício autorizado. Contate o RH.</div>`
+      : (() => {
+          // Separar disponíveis dos bloqueados
+          const disponiveis = bs.filter(b => {
+            const check = verificarLimiteBeneficio(eid, e.nascimento, b);
+            return !check.bloqueado || (!check.bloqueioTotal && !check.bloqueado);
+          });
+          const bloqueadosParciais = bs.filter(b => {
+            const check = verificarLimiteBeneficio(eid, e.nascimento, b);
+            return check.bloqueado && !check.bloqueioTotal;
+          });
+          const bloqueadosTotais = bs.filter(b => {
+            const check = verificarLimiteBeneficio(eid, e.nascimento, b);
+            return check.bloqueado && check.bloqueioTotal;
+          });
+          // disponíveis = não bloqueados + parciais (limite atingido mas libera outros)
+          const paraUso = bs.filter(b => {
+            const check = verificarLimiteBeneficio(eid, e.nascimento, b);
+            return !check.bloqueado;
+          });
+          const parciais = bs.filter(b => {
+            const check = verificarLimiteBeneficio(eid, e.nascimento, b);
+            return check.bloqueado && !check.bloqueioTotal;
+          });
+          const totais = bs.filter(b => {
+            const check = verificarLimiteBeneficio(eid, e.nascimento, b);
+            return check.bloqueado && check.bloqueioTotal;
+          });
+          const paraExibir = [...paraUso, ...parciais]; // disponíveis + parciais liberados
+
+          return `
+          <div style="margin-top:12px">
+            <div style="font-size:11px;font-weight:700;color:var(--green-700);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">Benefícios disponíveis</div>
+            ${paraExibir.length === 0
+              ? `<div class="warn-bar"><i class="ti ti-alert-triangle"></i> Nenhum benefício disponível no momento. Todos os limites foram atingidos. Contate o Departamento Pessoal.</div>`
+              : `<div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:14px">
+                  ${paraExibir.map(b => {
+                    const parcial = parciais.includes(b);
+                    return `<span class="benef-emp-tag" style="${parcial?'background:var(--amber-50);color:var(--amber-700);border-color:var(--amber-100)':''}">
+                      <i class="ti ti-check" style="font-size:10px"></i> ${b}${parcial?' ⚠️':''}
+                    </span>`;
+                  }).join('')}
+                </div>`
+            }
+            ${totais.length > 0 ? `
+              <div style="font-size:11px;color:var(--gray-400);margin-bottom:14px;display:flex;align-items:center;gap:5px">
+                <i class="ti ti-lock" style="font-size:12px"></i>
+                ${totais.length} benefício(s) com limite atingido não ${totais.length===1?'está':'estão'} disponível(eis) no momento.
+              </div>` : ''}
+          </div>
+          ${paraExibir.length > 0 ? `
+          <div class="uso-form-box">
+            <div class="uso-form-title"><i class="ti ti-clipboard-check"></i> Registrar uso do benefício</div>
+            <div class="form-row">
+              <div><label>Loja *</label><select id="loja-${eid}">${lojas.map(l=>`<option value="${l}">${l}</option>`).join('')}</select></div>
+              <div><label>Responsável pelo atendimento *</label><input type="text" id="resp-${eid}" placeholder="Nome do atendente..."></div>
+            </div>
+            <div style="margin-bottom:10px">
+              <label>Benefícios utilizados * <span style="font-weight:400;color:var(--gray-400)">(selecione um ou mais)</span></label>
+              <div class="benef-select-list" id="benef-sel-${eid}">
+                ${paraExibir.map(b => {
+                  const parcial = parciais.includes(b);
+                  const estilo = parcial ? 'border-color:var(--amber-100);background:var(--amber-50);color:var(--amber-700)' : '';
+                  const title = parcial ? 'Limite mensal atingido — registrado com desconto padrão' : '';
+                  return `<div class="benef-select-item" onclick="toggleBenefSel(this)" data-benef="${b}" data-bloqueado="false" title="${title}" style="${estilo}">
+                    <i class="ti ti-plus" style="font-size:12px"></i>${b}${parcial?' ⚠️':''}
+                  </div>`;
+                }).join('')}
+              </div>
+            </div>
+            <div class="form-row">
+              <div><label>Valor da compra (R$)</label><input type="number" id="valor-${eid}" placeholder="0,00" min="0" step="0.01"></div>
+              <div><label>Valor com desconto (R$)</label><input type="number" id="desconto-${eid}" placeholder="0,00" min="0" step="0.01"></div>
+            </div>
+            <div class="form-row">
+              <div><label>Número da nota fiscal</label><input type="text" id="nf-${eid}" placeholder="Ex: 000123"></div>
+              <div><label>Observação (opcional)</label><input type="text" id="obs-${eid}" placeholder="Detalhes adicionais..."></div>
+            </div>
+            <button class="btn btn-green btn-full" id="btn-${eid}" onclick="registrarUso('${eid}','${ne}')">
+              <i class="ti ti-check"></i> Confirmar uso do benefício
+            </button>
+            <div id="msg-${eid}"></div>
+          </div>` : ''}`;
+        })()
+    ) : ''}
+  </div>`;
+}
+window.searchEmployee=searchEmployee;
+
+function toggleBenefSel(el){
+  if(el.dataset.bloqueado === 'true'){
+    alert('Limite de uso atingido. Este benefício não está disponível no momento. Em caso de dúvidas, contate o Departamento Pessoal da empresa.');
+    return;
+  }
+  el.classList.toggle('selected');
+  const i=el.querySelector('i');
+  i.className='ti ti-'+(el.classList.contains('selected')?'check':'plus');
+  i.style.fontSize='12px';
+}
+window.toggleBenefSel=toggleBenefSel;
+
+async function registrarUso(eid, empNome){
+  const loja=document.getElementById(`loja-${eid}`).value;
+  const resp=document.getElementById(`resp-${eid}`).value.trim();
+  const selectedBenefs=[...document.querySelectorAll(`#benef-sel-${eid} .benef-select-item.selected`)].map(el=>el.dataset.benef);
+  const valor=parseFloat(document.getElementById(`valor-${eid}`).value)||0;
+  const desconto=parseFloat(document.getElementById(`desconto-${eid}`).value)||0;
+  const nf=document.getElementById(`nf-${eid}`).value.trim();
+  const obs=document.getElementById(`obs-${eid}`).value.trim();
+  if(!loja){alert('Selecione a loja.');return;}
+  if(!resp){alert('Informe o responsável pelo atendimento.');return;}
+  if(!selectedBenefs.length){alert('Selecione pelo menos um benefício utilizado.');return;}
+
+  // ── VERIFICAR LIMITES ──
+  const emp = employees.find(e => e.fbId === eid || String(e.id) === String(eid));
+  const empNascimento = emp ? emp.nascimento : null;
+  const benefBloqueados = [];
+  const benefLiberados = [];
+
+  for (const b of selectedBenefs) {
+    const check = verificarLimiteBeneficio(eid, empNascimento, b);
+    if (check.bloqueado && check.bloqueioTotal) {
+      benefBloqueados.push({ nome: b, check });
+    } else if (check.bloqueado && !check.bloqueioTotal) {
+      // Bloqueio parcial — avisa mas não bloqueia os demais
+      benefBloqueados.push({ nome: b, check, parcial: true });
+    } else {
+      benefLiberados.push(b);
+    }
+  }
+
+  // Se tem benefícios com bloqueio total, mostrar mensagem e bloquear
+  const bloqueiosTotais = benefBloqueados.filter(b => !b.parcial);
+  if (bloqueiosTotais.length > 0) {
+    const nomes = bloqueiosTotais.map(b => `• ${b.nome}${b.check.proximo ? ' (disponível a partir de '+b.check.proximo+')' : ''}${b.check.msg ? ': '+b.check.msg : ''}`).join('\n');
+    alert(`Limite de uso atingido. Este benefício não está disponível no momento. Em caso de dúvidas, contate o Departamento Pessoal da empresa.\n\n${nomes}`);
+    return;
+  }
+
+  // Bloqueios parciais (50%/40%) — avisa e continua apenas com os liberados
+  const bloqueiosParciais = benefBloqueados.filter(b => b.parcial);
+  if (bloqueiosParciais.length > 0) {
+    const nomes = bloqueiosParciais.map(b => `• ${b.nome}`).join('\n');
+    const continuar = confirm(`Atenção! O limite mensal dos seguintes benefícios já foi atingido:\n\n${nomes}\n\nEstes serão removidos do registro. Os demais benefícios selecionados serão registrados normalmente. Deseja continuar?`);
+    if (!continuar) return;
+    // Remove os bloqueados parciais da lista
+    selectedBenefs.splice(0, selectedBenefs.length, ...benefLiberados);
+    if (!selectedBenefs.length) { alert('Nenhum benefício disponível para registrar.'); return; }
+  }
+  const btn=document.getElementById(`btn-${eid}`);
+  btn.disabled=true;btn.innerHTML='<i class="ti ti-loader"></i> Registrando...';
+  const now=new Date();
+  const registro={empId:eid,empNome,loja,responsavel:resp,tipos:selectedBenefs,tipo:selectedBenefs.join(', '),valor,desconto,nf,obs,
+    data:now.toLocaleDateString('pt-BR'),
+    hora:now.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}),
+    ts:now.toISOString()};
+  if(isConnected){ await fbAdd('usos',registro); }
+  else { usos.unshift({...registro,id:Date.now()}); ls_set('big_uso_v4',usos); }
+  document.getElementById(`msg-${eid}`).innerHTML=`<div class="success-msg"><i class="ti ti-circle-check" style="font-size:20px"></i> Uso registrado em ${registro.data} às ${registro.hora}</div>`;
+  document.getElementById(`valor-${eid}`).value='';
+  document.getElementById(`desconto-${eid}`).value='';
+  document.getElementById(`nf-${eid}`).value='';
+  document.getElementById(`obs-${eid}`).value='';
+  document.getElementById(`resp-${eid}`).value='';
+  document.querySelectorAll(`#benef-sel-${eid} .benef-select-item.selected`).forEach(el=>{
+    el.classList.remove('selected');
+    const i=el.querySelector('i');i.className='ti ti-plus';i.style.fontSize='12px';
+  });
+  btn.disabled=false;btn.innerHTML='<i class="ti ti-check"></i> Confirmar uso do benefício';
+}
+window.registrarUso=registrarUso;
+
+// ── ADMIN ──
+function renderAdmin(){
+  const ativos=employees.filter(e=>e.status==='ativo').length;
+  const mes=new Date().getMonth();
+  document.getElementById('stat-total').textContent=employees.length;
+  document.getElementById('stat-ativos').textContent=ativos;
+  document.getElementById('stat-inativos').textContent=employees.length-ativos;
+  document.getElementById('stat-usos').textContent=usos.filter(u=>new Date(u.ts).getMonth()===mes).length;
+  renderEmpList();
+}
+
+function renderEmpList(){
+  const el=document.getElementById('emp-list');
+  if(!el)return;
+  if(!employees.length){el.innerHTML='<div class="empty"><i class="ti ti-users-off" style="font-size:32px;display:block;margin-bottom:8px"></i>Nenhum funcionário cadastrado</div>';return;}
+  el.innerHTML=employees.map(e=>{
+    const eid=e.fbId||e.id;
+    const bs=empBenefs(e);
+    const tagsHtml=bs.length?bs.map(b=>`<span class="benef-emp-tag">${b}</span>`).join(''):`<span class="benef-emp-tag none"><i class="ti ti-alert-triangle" style="font-size:10px"></i> Nenhum benefício definido</span>`;
+    const togglesHtml=beneficios.map(b=>{
+      const nome=getBenefNome(b);
+      const on=bs.includes(nome);
+      return `<label class="benef-toggle ${on?'on':''}" onclick="toggleBenefEmp('${eid}','${nome.replace(/'/g,"\\'")}',this)">
+        <i class="ti ti-${on?'check':'plus'}" style="font-size:12px"></i>${nome}</label>`;
+    }).join('');
+    return `<div class="emp-card" id="ecard-${eid}">
+      <div class="emp-card-header" onclick="toggleEmpCard('${eid}')">
+        <div style="display:flex;align-items:center;gap:12px;flex:1;min-width:0">
+          <div class="avatar" style="width:38px;height:38px;font-size:13px;background:${e.status==='ativo'?'var(--green-50)':'var(--gray-100)'};color:${e.status==='ativo'?'var(--green-900)':'var(--gray-700)'}">
+            ${initials(e.nome)}</div>
+          <div style="min-width:0">
+            <div style="font-size:14px;font-weight:600">${e.nome}</div>
+            <div style="font-size:12px;color:var(--gray-700)">${e.cargo||''}${e.cpf?' · '+e.cpf:''}${e.nascimento?' · '+formatNasc(e.nascimento):''}</div>
+            <div class="benef-emp-tags" id="etags-${eid}">${tagsHtml}</div>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <span class="badge ${e.status}" style="font-size:11px">${e.status}</span>
+          <i class="ti ti-chevron-down chevron"></i>
+        </div>
+      </div>
+      <div class="emp-card-body" id="ebody-${eid}">
+        <div class="benef-section-label"><i class="ti ti-gift" style="font-size:11px;margin-right:4px"></i>Benefícios — clique para ativar/desativar</div>
+        <div class="benef-toggle-list" style="margin-bottom:14px">${togglesHtml}</div>
+        <div style="display:flex;gap:8px;padding-top:12px;border-top:1px solid var(--gray-100);flex-wrap:wrap">
+          <button class="btn btn-sm btn-blue" onclick="openEditModal('${eid}');event.stopPropagation()"><i class="ti ti-pencil"></i> Editar dados</button>
+          <button class="btn btn-sm ${e.status==='ativo'?'btn-red':''}" onclick="toggleStatus('${eid}');event.stopPropagation()">${e.status==='ativo'?'Desativar':'Ativar'}</button>
+          <button class="btn btn-sm btn-red" onclick="removeEmployee('${eid}');event.stopPropagation()"><i class="ti ti-trash"></i> Remover</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function toggleEmpCard(id){
+  document.getElementById(`ecard-${id}`)?.classList.toggle('expanded');
+  document.getElementById(`ebody-${id}`)?.classList.toggle('open');
+}
+window.toggleEmpCard=toggleEmpCard;
+
+async function toggleBenefEmp(eid,benef,labelEl){
+  const e=employees.find(x=>x.fbId===eid||String(x.id)===String(eid));if(!e)return;
+  if(!Array.isArray(e.beneficios))e.beneficios=[];
+  const idx=e.beneficios.indexOf(benef);
+  if(idx===-1){e.beneficios.push(benef);labelEl.classList.add('on');labelEl.innerHTML=`<i class="ti ti-check" style="font-size:12px"></i>${benef}`;}
+  else{e.beneficios.splice(idx,1);labelEl.classList.remove('on');labelEl.innerHTML=`<i class="ti ti-plus" style="font-size:12px"></i>${benef}`;}
+  if(isConnected){await fbUpdate('employees',eid,{beneficios:e.beneficios});}
+  else{ls_set('big_emp_v4',employees);}
+  const ta=document.getElementById(`etags-${eid}`);
+  const bs=empBenefs(e);
+  if(ta)ta.innerHTML=bs.length?bs.map(b=>`<span class="benef-emp-tag">${b}</span>`).join(''):`<span class="benef-emp-tag none"><i class="ti ti-alert-triangle" style="font-size:10px"></i> Nenhum benefício definido</span>`;
+}
+window.toggleBenefEmp=toggleBenefEmp;
+
+function renderNewBenefToggles(){
+  const c=document.getElementById('new-benef-toggles');if(!c)return;
+  c.innerHTML=beneficios.map(b=>{
+    const nome=getBenefNome(b);
+    return `<label class="benef-toggle" onclick="this.classList.toggle('on');var i=this.querySelector('i');i.className='ti ti-'+(this.classList.contains('on')?'check':'plus');i.style.fontSize='12px'">
+      <i class="ti ti-plus" style="font-size:12px"></i>${nome}</label>`;
+  }).join('');
+}
+
+async function toggleStatus(eid){
+  const e=employees.find(x=>x.fbId===eid||String(x.id)===String(eid));if(!e)return;
+  const ns=e.status==='ativo'?'inativo':'ativo';
+  if(isConnected){await fbUpdate('employees',eid,{status:ns});}
+  else{e.status=ns;ls_set('big_emp_v4',employees);renderAdmin();}
+}
+window.toggleStatus=toggleStatus;
+
+async function removeEmployee(eid){
+  if(!confirm('Remover este funcionário?'))return;
+  if(isConnected){await fbDelete('employees',eid);}
+  else{employees=employees.filter(x=>x.fbId!==eid&&String(x.id)!==String(eid));ls_set('big_emp_v4',employees);renderAdmin();}
+}
+window.removeEmployee=removeEmployee;
+
+async function addEmployee(){
+  const nome=document.getElementById('new-name').value.trim();
+  if(!nome){document.getElementById('new-name').focus();return;}
+  const selectedBenefs=[...document.querySelectorAll('#new-benef-toggles .benef-toggle.on')].map(l=>l.textContent.trim());
+  const emp={nome,cpf:document.getElementById('new-cpf').value.trim(),cargo:document.getElementById('new-cargo').value.trim(),nascimento:document.getElementById('new-nascimento').value,status:document.getElementById('new-status').value,beneficios:selectedBenefs,createdAt:new Date().toISOString()};
+  if(isConnected){await fbAdd('employees',emp);}
+  else{employees.push({...emp,id:Date.now()});ls_set('big_emp_v4',employees);renderAdmin();}
+  ['new-name','new-cpf','new-cargo','new-nascimento'].forEach(id=>document.getElementById(id).value='');
+  renderNewBenefToggles();
+}
+window.addEmployee=addEmployee;
+
+// ── BENEFÍCIOS E LOJAS ──
+function renderBenef(){
+  const el=document.getElementById('benef-list');
+  if(!el)return;
+  if(!beneficios.length){el.innerHTML='<div class="empty">Nenhum benefício cadastrado</div>';}
+  else{
+    const periodoLabel={mes:'Por mês',trimestre:'Por trimestre',semestre:'Por semestre',ano:'Por ano',aniversario:'Aniversário'};
+    const bloqueioLabel={total:'Bloqueia tudo',parcial:'Bloqueia só este'};
+    el.innerHTML=beneficios.map((b,i)=>{
+      const nome=getBenefNome(b);
+      const lim=getBenefLimite(b);
+      return `<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:.5px solid var(--gray-100);gap:8px;flex-wrap:wrap">
+        <div>
+          <div style="font-size:14px;font-weight:500">${nome}</div>
+          <div style="margin-top:3px">
+            ${lim
+              ?`<span style="color:var(--amber-700);background:var(--amber-50);border:1px solid var(--amber-100);padding:2px 8px;border-radius:99px;font-size:11px;font-weight:600"><i class="ti ti-clock" style="font-size:10px"></i> ${lim.vezes}x ${periodoLabel[lim.periodo]||lim.periodo} · ${bloqueioLabel[lim.bloqueio]||lim.bloqueio}</span>`
+              :`<span style="color:var(--green-700);background:var(--green-50);border:1px solid var(--green-100);padding:2px 8px;border-radius:99px;font-size:11px;font-weight:600"><i class="ti ti-infinity" style="font-size:10px"></i> Ilimitado</span>`}
+          </div>
+        </div>
+        <div style="display:flex;gap:6px">
+          <button class="btn btn-sm btn-blue" onclick="openModalBenefLimite(${i})"><i class="ti ti-settings"></i> Limite</button>
+          <button class="btn btn-sm btn-red" onclick="removeBenef(${i})"><i class="ti ti-trash"></i></button>
+        </div>
+      </div>`;
+    }).join('');
+  }
+  document.getElementById('loja-chips').innerHTML=lojas.length
+    ?lojas.map((l,i)=>`<span class="chip blue">${l}<button onclick="removeLoja(${i})">×</button></span>`).join('')
+    :'<span style="font-size:13px;color:var(--gray-400)">Nenhuma cadastrada</span>';
+}
+
+function toggleNewBenefLimite(){const v=document.getElementById('new-benef-tem-limite').value;document.getElementById('new-benef-limite-campos').style.display=v==='sim'?'block':'none';}
+function toggleEditBenefLimite(){const v=document.getElementById('edit-benef-tem-limite').value;document.getElementById('edit-benef-limite-campos').style.display=v==='sim'?'block':'none';}
+window.toggleNewBenefLimite=toggleNewBenefLimite;window.toggleEditBenefLimite=toggleEditBenefLimite;
+
+function openModalBenefLimite(i){
+  const b=beneficios[i];const nome=getBenefNome(b);const lim=getBenefLimite(b);
+  document.getElementById('edit-benef-idx').value=i;
+  document.getElementById('edit-benef-nome').value=nome;
+  document.getElementById('edit-benef-tem-limite').value=lim?'sim':'nao';
+  document.getElementById('edit-benef-limite-campos').style.display=lim?'block':'none';
+  if(lim){document.getElementById('edit-benef-vezes').value=lim.vezes||1;document.getElementById('edit-benef-periodo').value=lim.periodo||'mes';document.getElementById('edit-benef-bloqueio').value=lim.bloqueio||'total';}
+  document.getElementById('modal-benef-limite').classList.add('open');
+}
+function closeModalBenefLimite(){document.getElementById('modal-benef-limite').classList.remove('open');}
+async function salvarLimiteBenef(){
+  const i=parseInt(document.getElementById('edit-benef-idx').value);
+  const temLimite=document.getElementById('edit-benef-tem-limite').value==='sim';
+  const b=beneficios[i];const bObj=typeof b==='string'?{nome:b}:{...b};
+  bObj.limite=temLimite?{ativo:true,vezes:parseInt(document.getElementById('edit-benef-vezes').value)||1,periodo:document.getElementById('edit-benef-periodo').value,bloqueio:document.getElementById('edit-benef-bloqueio').value}:{ativo:false};
+  beneficios[i]=bObj;
+  await fbSaveSettings();closeModalBenefLimite();renderBenef();renderNewBenefToggles();
+}
+window.openModalBenefLimite=openModalBenefLimite;window.closeModalBenefLimite=closeModalBenefLimite;window.salvarLimiteBenef=salvarLimiteBenef;
+
+async function addBenef(){
+  const nome=document.getElementById('new-benef').value.trim();
+  if(!nome||beneficios.some(b=>getBenefNome(b)===nome))return;
+  const temLimite=document.getElementById('new-benef-tem-limite').value==='sim';
+  const bObj={nome};
+  bObj.limite=temLimite?{ativo:true,vezes:parseInt(document.getElementById('new-benef-vezes').value)||1,periodo:document.getElementById('new-benef-periodo').value,bloqueio:document.getElementById('new-benef-bloqueio').value}:{ativo:false};
+  beneficios.push(bObj);await fbSaveSettings();
+  document.getElementById('new-benef').value='';document.getElementById('new-benef-tem-limite').value='nao';document.getElementById('new-benef-limite-campos').style.display='none';
+  renderBenef();renderNewBenefToggles();
+}
+async function removeBenef(i){
+  const nome=getBenefNome(beneficios[i]);if(!confirm(`Remover "${nome}"?`))return;
+  beneficios.splice(i,1);
+  employees.forEach(e=>{if(Array.isArray(e.beneficios))e.beneficios=e.beneficios.filter(b=>b!==nome);});
+  if(isConnected){await fbSaveSettings();for(const e of employees)await fbUpdate('employees',e.fbId,{beneficios:e.beneficios});}
+  else{ls_set('big_emp_v4',employees);}
+  renderBenef();renderNewBenefToggles();
+}
+async function addLoja(){
+  const v=document.getElementById('new-loja').value.trim();if(!v||lojas.includes(v))return;
+  lojas.push(v);await fbSaveSettings();document.getElementById('new-loja').value='';renderBenef();
+}
+async function removeLoja(i){lojas.splice(i,1);await fbSaveSettings();renderBenef();}
+window.addBenef=addBenef;window.removeBenef=removeBenef;window.addLoja=addLoja;window.removeLoja=removeLoja;
+
+// ── HISTÓRICO ──
+function getFiltered(){
+  const nome=document.getElementById('filt-nome').value.trim().toLowerCase();
+  const loja=document.getElementById('filt-loja').value;
+  const benef=document.getElementById('filt-benef').value;
+  const mes=document.getElementById('filt-mes').value;
+  return usos.filter(u=>{
+    if(nome&&!u.empNome.toLowerCase().includes(nome))return false;
+    if(loja&&u.loja!==loja)return false;
+    if(benef&&u.tipo!==benef)return false;
+    if(mes){const d=new Date(u.ts);const ym=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;if(ym!==mes)return false;}
+    return true;
+  });
+}
+function renderHistorico(){
+  const fl=document.getElementById('filt-loja'),fb=document.getElementById('filt-benef');
+  const curL=fl.value,curB=fb.value;
+  fl.innerHTML='<option value="">Todas as lojas</option>'+lojas.map(l=>`<option value="${l}">${l}</option>`).join('');fl.value=curL;
+  fb.innerHTML='<option value="">Todos os benefícios</option>'+beneficios.map(b=>`<option value="${b}">${b}</option>`).join('');fb.value=curB;
+  const f=getFiltered();
+  const list=document.getElementById('uso-list');
+  if(!f.length){list.innerHTML='<div class="empty"><i class="ti ti-inbox" style="font-size:32px;display:block;margin-bottom:8px"></i>Nenhum registro encontrado</div>';return;}
+  list.innerHTML=f.map(u=>`<div class="uso-item">
+    <div class="uso-item-top">
+      <span class="uso-nome"><i class="ti ti-user" style="font-size:13px;vertical-align:-1px;margin-right:4px;color:var(--gray-400)"></i>${u.empNome}</span>
+      <span class="uso-data">${u.data} · ${u.hora}</span>
+    </div>
+    <div class="uso-detalhe" style="margin-bottom:4px">
+      <span class="tag loja"><i class="ti ti-building-store" style="font-size:11px"></i> ${u.loja}</span>
+      ${u.responsavel?`<span class="tag" style="background:var(--blue-50);color:var(--blue-900)"><i class="ti ti-user-check" style="font-size:11px"></i> ${u.responsavel}</span>`:''}
+    </div>
+    <div class="uso-detalhe" style="margin-bottom:4px">
+      ${(u.tipos||[u.tipo]).map(b=>`<span class="tag benef">${b}</span>`).join('')}
+    </div>
+    <div class="uso-detalhe">
+      ${u.valor?`<span class="tag valor"><i class="ti ti-currency-real" style="font-size:11px"></i> Compra: ${formatValor(u.valor)}</span>`:''}
+      ${u.desconto?`<span class="tag" style="background:#E1F5EE;color:#085041"><i class="ti ti-discount" style="font-size:11px"></i> C/ desconto: ${formatValor(u.desconto)}</span>`:''}
+      ${u.nf?`<span class="tag" style="background:var(--gray-100);color:var(--gray-700)"><i class="ti ti-receipt" style="font-size:11px"></i> NF: ${u.nf}</span>`:''}
+      ${u.obs?`<span style="color:var(--gray-400)">— ${u.obs}</span>`:''}
+    </div>
+  </div>`).join('');
+}
+function clearHistory(){
+  document.getElementById('limpar-senha').value='';
+  document.getElementById('limpar-erro').textContent='';
+  document.getElementById('modal-limpar').classList.add('open');
+}
+function closeModalLimpar(){document.getElementById('modal-limpar').classList.remove('open');}
+async function confirmarLimpar(){
+  const senha=document.getElementById('limpar-senha').value;
+  if(senha!==adminSenha){document.getElementById('limpar-erro').textContent='Senha incorreta.';return;}
+  if(isConnected){for(const u of usos) if(u.fbId)await fbDelete('usos',u.fbId);}
+  else{usos=[];ls_set('big_uso_v4',usos);}
+  closeModalLimpar();
+  renderHistorico();renderAdmin();
+}
+window.clearHistory=clearHistory;window.closeModalLimpar=closeModalLimpar;window.confirmarLimpar=confirmarLimpar;
+
+function exportCSV(){
+  const f=getFiltered();if(!f.length){alert('Nenhum registro para exportar.');return;}
+  const cols=['Funcionário','CPF','Data de Nasc.','Idade','Cargo','Loja','Responsável Atendimento','Benefícios Utilizados','Nota Fiscal','Valor Compra (R$)','Valor c/ Desconto (R$)','Data','Hora','Observação'];
+  const sep=';';
+  const esc=v=>{const s=String(v===null||v===undefined?'':v);return s.includes(sep)||s.includes('"')||s.includes('\n')?'"'+s.replace(/"/g,'""')+'"':s;};
+  const rows=f.map(u=>{
+    const emp=employees.find(e=>e.fbId===u.empId||String(e.id)===String(u.empId));
+    return[u.empNome,emp?emp.cpf||'':'',emp&&emp.nascimento?formatNasc(emp.nascimento):'',emp&&emp.nascimento?calcIdade(emp.nascimento):'',emp?emp.cargo||'':'',u.loja,u.responsavel||'',(u.tipos||[u.tipo]).join('; '),u.nf||'',u.valor?u.valor.toFixed(2).replace('.',','):'',u.desconto?u.desconto.toFixed(2).replace('.',','):'',u.data,u.hora,u.obs||''].map(esc).join(sep);
+  });
+  const csv='\uFEFF'+cols.map(esc).join(sep)+'\r\n'+rows.join('\r\n');
+  const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  const mes=document.getElementById('filt-mes').value;
+  a.href=url;a.download=`beneficios_${mes||new Date().toISOString().slice(0,7)}.csv`;
+  document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(url);
+  document.getElementById('export-status').innerHTML=`<div class="success-msg"><i class="ti ti-circle-check" style="font-size:18px"></i> Arquivo exportado com ${f.length} registro(s) — abra no Excel.</div>`;
+  setTimeout(()=>document.getElementById('export-status').innerHTML='',5000);
+}
+window.exportCSV=exportCSV;
+
+// Fechar modais clicando fora
+document.querySelectorAll('.modal-overlay').forEach(o=>o.addEventListener('click',function(e){if(e.target===this)this.classList.remove('open');}));
+
+init();
+</script>
+</body>
+</html>
