@@ -244,11 +244,48 @@ label{font-size:12px;color:var(--gray-700);display:block;margin-bottom:4px;font-
       <!-- BENEFÍCIOS E LOJAS -->
       <div id="s-benef" class="subsection">
         <div class="card">
-          <div class="section-title">Tipos de benefício</div>
-          <div class="chips" id="benef-chips"></div>
-          <div class="form-row">
-            <input type="text" id="new-benef" placeholder="Novo benefício (ex: Farmácia)">
-            <button class="btn btn-green" style="flex:0" onclick="addBenef()"><i class="ti ti-plus"></i> Adicionar</button>
+          <div class="section-title">Tipos de benefício — clique para configurar limite</div>
+          <div id="benef-list"></div>
+          <div style="border-top:.5px solid var(--gray-200);padding-top:1rem;margin-top:.5rem">
+            <div class="section-title">Adicionar benefício</div>
+            <div class="form-row">
+              <div style="flex:2"><label>Nome do benefício *</label><input type="text" id="new-benef" placeholder="Ex: 30% desconto Havaianas"></div>
+            </div>
+            <div class="form-row">
+              <div>
+                <label>Tem limite de uso?</label>
+                <select id="new-benef-tem-limite" onchange="toggleNewBenefLimite()">
+                  <option value="nao">Não (ilimitado)</option>
+                  <option value="sim">Sim</option>
+                </select>
+              </div>
+            </div>
+            <div id="new-benef-limite-campos" style="display:none">
+              <div class="form-row">
+                <div>
+                  <label>Quantidade de usos permitidos</label>
+                  <input type="number" id="new-benef-vezes" value="1" min="1" placeholder="Ex: 1">
+                </div>
+                <div>
+                  <label>Período</label>
+                  <select id="new-benef-periodo">
+                    <option value="mes">Por mês</option>
+                    <option value="trimestre">Por trimestre (3 meses)</option>
+                    <option value="semestre">Por semestre (6 meses)</option>
+                    <option value="ano">Por ano</option>
+                    <option value="aniversario">Aniversário (mês + 15 dias)</option>
+                  </select>
+                </div>
+                <div>
+                  <label>Tipo de bloqueio</label>
+                  <select id="new-benef-bloqueio">
+                    <option value="total">Bloqueia completamente</option>
+                    <option value="parcial">Bloqueia só este, libera os demais</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+            <button class="btn btn-green" onclick="addBenef()"><i class="ti ti-plus"></i> Adicionar benefício</button>
           </div>
         </div>
         <div class="card">
@@ -281,6 +318,48 @@ label{font-size:12px;color:var(--gray-700);display:block;margin-bottom:4px;font-
           <div id="export-status" style="margin-top:8px"></div>
         </div>
       </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL EDITAR LIMITE BENEFÍCIO -->
+<div class="modal-overlay" id="modal-benef-limite">
+  <div class="modal">
+    <h3><i class="ti ti-settings" style="color:var(--green-600)"></i> Configurar limite de uso</h3>
+    <input type="hidden" id="edit-benef-idx">
+    <div style="margin-bottom:10px"><label>Benefício</label><input type="text" id="edit-benef-nome" disabled style="background:var(--gray-100)"></div>
+    <div style="margin-bottom:10px">
+      <label>Tem limite de uso?</label>
+      <select id="edit-benef-tem-limite" onchange="toggleEditBenefLimite()">
+        <option value="nao">Não (ilimitado)</option>
+        <option value="sim">Sim</option>
+      </select>
+    </div>
+    <div id="edit-benef-limite-campos">
+      <div class="form-row">
+        <div><label>Quantidade de usos</label><input type="number" id="edit-benef-vezes" value="1" min="1"></div>
+        <div>
+          <label>Período</label>
+          <select id="edit-benef-periodo">
+            <option value="mes">Por mês</option>
+            <option value="trimestre">Por trimestre (3 meses)</option>
+            <option value="semestre">Por semestre (6 meses)</option>
+            <option value="ano">Por ano</option>
+            <option value="aniversario">Aniversário (mês + 15 dias)</option>
+          </select>
+        </div>
+      </div>
+      <div style="margin-bottom:10px">
+        <label>Tipo de bloqueio</label>
+        <select id="edit-benef-bloqueio">
+          <option value="total">Bloqueia completamente</option>
+          <option value="parcial">Bloqueia só este, libera os demais</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" onclick="closeModalBenefLimite()">Cancelar</button>
+      <button class="btn btn-green" onclick="salvarLimiteBenef()"><i class="ti ti-check"></i> Salvar</button>
     </div>
   </div>
 </div>
@@ -350,6 +429,64 @@ let app, db;
 let employees=[], usos=[], beneficios=[], lojas=[];
 let adminSenha = '1234';
 let isConnected = false;
+
+// ══════════════════════════════════════════════════
+// SISTEMA DE LIMITES DINÂMICO (gerenciado pelo admin)
+// beneficios = array de objetos: { nome, limite: {ativo,vezes,periodo,bloqueio} }
+// ══════════════════════════════════════════════════
+function getBenefNome(b){ return typeof b==='string'?b:b.nome; }
+function getBenefLimite(b){ if(typeof b==='string')return null; return b.limite&&b.limite.ativo?b.limite:null; }
+function getBenefObj(nome){ return beneficios.find(b=>getBenefNome(b)===nome); }
+
+const PERIODO_LABEL = { mes:'mês', trimestre:'trimestre', semestre:'semestre', ano:'ano', aniversario:'aniversário' };
+
+function verificarLimiteBeneficio(empId, empNascimento, benefNome) {
+  const bobj = getBenefObj(benefNome);
+  const limite = bobj ? getBenefLimite(bobj) : null;
+  if (!limite) return { bloqueado: false };
+
+  const now = new Date();
+  const bloqueioTotal = limite.bloqueio !== 'parcial';
+
+  const usosEmp = usos.filter(u => {
+    const mesmoEmp = u.empId===empId || String(u.empId)===String(empId);
+    const temBenef = (u.tipos||[u.tipo]).some(t=>t===benefNome);
+    return mesmoEmp && temBenef;
+  });
+
+  if (limite.periodo === 'mes') {
+    const count = usosEmp.filter(u=>{const d=new Date(u.ts);return d.getMonth()===now.getMonth()&&d.getFullYear()===now.getFullYear();}).length;
+    if (count >= limite.vezes) return { bloqueado:true, bloqueioTotal };
+  }
+  if (limite.periodo === 'trimestre' || limite.periodo === 'semestre') {
+    const meses = limite.periodo==='trimestre'?3:6;
+    const desde = new Date(now); desde.setMonth(desde.getMonth()-meses);
+    const recentes = usosEmp.filter(u=>new Date(u.ts)>=desde);
+    if (recentes.length >= limite.vezes) {
+      const prox = new Date(recentes[0].ts); prox.setMonth(prox.getMonth()+meses);
+      return { bloqueado:true, bloqueioTotal:true, proximo:prox.toLocaleDateString('pt-BR') };
+    }
+  }
+  if (limite.periodo === 'ano') {
+    const count = usosEmp.filter(u=>new Date(u.ts).getFullYear()===now.getFullYear()).length;
+    if (count >= limite.vezes) return { bloqueado:true, bloqueioTotal:true };
+  }
+  if (limite.periodo === 'aniversario') {
+    if (!empNascimento) return { bloqueado:false };
+    const nasc = new Date(empNascimento+'T00:00:00');
+    const mesAniv = nasc.getMonth();
+    const anoAtual = now.getFullYear();
+    const ini = new Date(anoAtual, mesAniv, 1);
+    const fim = new Date(anoAtual, mesAniv+1, 0); fim.setDate(fim.getDate()+15);
+    const usosAno = usosEmp.filter(u=>new Date(u.ts).getFullYear()===anoAtual);
+    if (usosAno.length >= limite.vezes) return { bloqueado:true, bloqueioTotal:true, msg:'Voucher aniversariante já utilizado este ano.' };
+    if (now < ini || now > fim) {
+      const mesNome = ini.toLocaleDateString('pt-BR',{month:'long'});
+      return { bloqueado:true, bloqueioTotal:true, msg:`Válido apenas em ${mesNome} ou até 15 dias após.` };
+    }
+  }
+  return { bloqueado:false };
+}
 
 // Fallback localStorage quando Firebase não configurado
 function ls_get(k,def){try{const v=localStorage.getItem(k);return v?JSON.parse(v):def;}catch{return def;}}
@@ -575,40 +712,99 @@ function searchEmployee(){
     </div>
     ${isAtivo ? (bs.length===0
       ? `<div class="warn-bar"><i class="ti ti-alert-triangle"></i> Nenhum benefício autorizado. Contate o RH.</div>`
-      : `<div style="margin-top:12px">
-          <div style="font-size:11px;font-weight:700;color:var(--green-700);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">Benefícios autorizados</div>
-          <div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:14px">${bs.map(b=>`<span class="benef-emp-tag"><i class="ti ti-check" style="font-size:10px"></i> ${b}</span>`).join('')}</div>
-        </div>
-        <div class="uso-form-box">
-          <div class="uso-form-title"><i class="ti ti-clipboard-check"></i> Registrar uso do benefício</div>
-          <div class="form-row">
-            <div><label>Loja *</label><select id="loja-${eid}">${lojas.map(l=>`<option value="${l}">${l}</option>`).join('')}</select></div>
-            <div><label>Responsável pelo atendimento *</label><input type="text" id="resp-${eid}" placeholder="Nome do atendente..."></div>
+      : (() => {
+          // Separar disponíveis dos bloqueados
+          const disponiveis = bs.filter(b => {
+            const check = verificarLimiteBeneficio(eid, e.nascimento, b);
+            return !check.bloqueado || (!check.bloqueioTotal && !check.bloqueado);
+          });
+          const bloqueadosParciais = bs.filter(b => {
+            const check = verificarLimiteBeneficio(eid, e.nascimento, b);
+            return check.bloqueado && !check.bloqueioTotal;
+          });
+          const bloqueadosTotais = bs.filter(b => {
+            const check = verificarLimiteBeneficio(eid, e.nascimento, b);
+            return check.bloqueado && check.bloqueioTotal;
+          });
+          // disponíveis = não bloqueados + parciais (limite atingido mas libera outros)
+          const paraUso = bs.filter(b => {
+            const check = verificarLimiteBeneficio(eid, e.nascimento, b);
+            return !check.bloqueado;
+          });
+          const parciais = bs.filter(b => {
+            const check = verificarLimiteBeneficio(eid, e.nascimento, b);
+            return check.bloqueado && !check.bloqueioTotal;
+          });
+          const totais = bs.filter(b => {
+            const check = verificarLimiteBeneficio(eid, e.nascimento, b);
+            return check.bloqueado && check.bloqueioTotal;
+          });
+          const paraExibir = [...paraUso, ...parciais]; // disponíveis + parciais liberados
+
+          return `
+          <div style="margin-top:12px">
+            <div style="font-size:11px;font-weight:700;color:var(--green-700);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">Benefícios disponíveis</div>
+            ${paraExibir.length === 0
+              ? `<div class="warn-bar"><i class="ti ti-alert-triangle"></i> Nenhum benefício disponível no momento. Todos os limites foram atingidos. Contate o Departamento Pessoal.</div>`
+              : `<div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:14px">
+                  ${paraExibir.map(b => {
+                    const parcial = parciais.includes(b);
+                    return `<span class="benef-emp-tag" style="${parcial?'background:var(--amber-50);color:var(--amber-700);border-color:var(--amber-100)':''}">
+                      <i class="ti ti-check" style="font-size:10px"></i> ${b}${parcial?' ⚠️':''}
+                    </span>`;
+                  }).join('')}
+                </div>`
+            }
+            ${totais.length > 0 ? `
+              <div style="font-size:11px;color:var(--gray-400);margin-bottom:14px;display:flex;align-items:center;gap:5px">
+                <i class="ti ti-lock" style="font-size:12px"></i>
+                ${totais.length} benefício(s) com limite atingido não ${totais.length===1?'está':'estão'} disponível(eis) no momento.
+              </div>` : ''}
           </div>
-          <div style="margin-bottom:10px">
-            <label>Benefícios utilizados * <span style="font-weight:400;color:var(--gray-400)">(selecione um ou mais)</span></label>
-            <div class="benef-select-list" id="benef-sel-${eid}">
-              ${bs.map(b=>`<div class="benef-select-item" onclick="toggleBenefSel(this)" data-benef="${b}"><i class="ti ti-plus" style="font-size:12px"></i>${b}</div>`).join('')}
+          ${paraExibir.length > 0 ? `
+          <div class="uso-form-box">
+            <div class="uso-form-title"><i class="ti ti-clipboard-check"></i> Registrar uso do benefício</div>
+            <div class="form-row">
+              <div><label>Loja *</label><select id="loja-${eid}">${lojas.map(l=>`<option value="${l}">${l}</option>`).join('')}</select></div>
+              <div><label>Responsável pelo atendimento *</label><input type="text" id="resp-${eid}" placeholder="Nome do atendente..."></div>
             </div>
-          </div>
-          <div class="form-row">
-            <div><label>Valor da compra (R$)</label><input type="number" id="valor-${eid}" placeholder="0,00" min="0" step="0.01"></div>
-            <div><label>Valor com desconto (R$)</label><input type="number" id="desconto-${eid}" placeholder="0,00" min="0" step="0.01"></div>
-          </div>
-          <div class="form-row">
-            <div><label>Número da nota fiscal</label><input type="text" id="nf-${eid}" placeholder="Ex: 000123"></div>
-            <div><label>Observação (opcional)</label><input type="text" id="obs-${eid}" placeholder="Detalhes adicionais..."></div>
-          </div>
-          <button class="btn btn-green btn-full" id="btn-${eid}" onclick="registrarUso('${eid}','${ne}')">
-            <i class="ti ti-check"></i> Confirmar uso do benefício
-          </button>
-          <div id="msg-${eid}"></div>
-        </div>`) : ''}
+            <div style="margin-bottom:10px">
+              <label>Benefícios utilizados * <span style="font-weight:400;color:var(--gray-400)">(selecione um ou mais)</span></label>
+              <div class="benef-select-list" id="benef-sel-${eid}">
+                ${paraExibir.map(b => {
+                  const parcial = parciais.includes(b);
+                  const estilo = parcial ? 'border-color:var(--amber-100);background:var(--amber-50);color:var(--amber-700)' : '';
+                  const title = parcial ? 'Limite mensal atingido — registrado com desconto padrão' : '';
+                  return `<div class="benef-select-item" onclick="toggleBenefSel(this)" data-benef="${b}" data-bloqueado="false" title="${title}" style="${estilo}">
+                    <i class="ti ti-plus" style="font-size:12px"></i>${b}${parcial?' ⚠️':''}
+                  </div>`;
+                }).join('')}
+              </div>
+            </div>
+            <div class="form-row">
+              <div><label>Valor da compra (R$)</label><input type="number" id="valor-${eid}" placeholder="0,00" min="0" step="0.01"></div>
+              <div><label>Valor com desconto (R$)</label><input type="number" id="desconto-${eid}" placeholder="0,00" min="0" step="0.01"></div>
+            </div>
+            <div class="form-row">
+              <div><label>Número da nota fiscal</label><input type="text" id="nf-${eid}" placeholder="Ex: 000123"></div>
+              <div><label>Observação (opcional)</label><input type="text" id="obs-${eid}" placeholder="Detalhes adicionais..."></div>
+            </div>
+            <button class="btn btn-green btn-full" id="btn-${eid}" onclick="registrarUso('${eid}','${ne}')">
+              <i class="ti ti-check"></i> Confirmar uso do benefício
+            </button>
+            <div id="msg-${eid}"></div>
+          </div>` : ''}`;
+        })()
+    ) : ''}
   </div>`;
 }
 window.searchEmployee=searchEmployee;
 
 function toggleBenefSel(el){
+  if(el.dataset.bloqueado === 'true'){
+    alert('Limite de uso atingido. Este benefício não está disponível no momento. Em caso de dúvidas, contate o Departamento Pessoal da empresa.');
+    return;
+  }
   el.classList.toggle('selected');
   const i=el.querySelector('i');
   i.className='ti ti-'+(el.classList.contains('selected')?'check':'plus');
@@ -627,6 +823,43 @@ async function registrarUso(eid, empNome){
   if(!loja){alert('Selecione a loja.');return;}
   if(!resp){alert('Informe o responsável pelo atendimento.');return;}
   if(!selectedBenefs.length){alert('Selecione pelo menos um benefício utilizado.');return;}
+
+  // ── VERIFICAR LIMITES ──
+  const emp = employees.find(e => e.fbId === eid || String(e.id) === String(eid));
+  const empNascimento = emp ? emp.nascimento : null;
+  const benefBloqueados = [];
+  const benefLiberados = [];
+
+  for (const b of selectedBenefs) {
+    const check = verificarLimiteBeneficio(eid, empNascimento, b);
+    if (check.bloqueado && check.bloqueioTotal) {
+      benefBloqueados.push({ nome: b, check });
+    } else if (check.bloqueado && !check.bloqueioTotal) {
+      // Bloqueio parcial — avisa mas não bloqueia os demais
+      benefBloqueados.push({ nome: b, check, parcial: true });
+    } else {
+      benefLiberados.push(b);
+    }
+  }
+
+  // Se tem benefícios com bloqueio total, mostrar mensagem e bloquear
+  const bloqueiosTotais = benefBloqueados.filter(b => !b.parcial);
+  if (bloqueiosTotais.length > 0) {
+    const nomes = bloqueiosTotais.map(b => `• ${b.nome}${b.check.proximo ? ' (disponível a partir de '+b.check.proximo+')' : ''}${b.check.msg ? ': '+b.check.msg : ''}`).join('\n');
+    alert(`Limite de uso atingido. Este benefício não está disponível no momento. Em caso de dúvidas, contate o Departamento Pessoal da empresa.\n\n${nomes}`);
+    return;
+  }
+
+  // Bloqueios parciais (50%/40%) — avisa e continua apenas com os liberados
+  const bloqueiosParciais = benefBloqueados.filter(b => b.parcial);
+  if (bloqueiosParciais.length > 0) {
+    const nomes = bloqueiosParciais.map(b => `• ${b.nome}`).join('\n');
+    const continuar = confirm(`Atenção! O limite mensal dos seguintes benefícios já foi atingido:\n\n${nomes}\n\nEstes serão removidos do registro. Os demais benefícios selecionados serão registrados normalmente. Deseja continuar?`);
+    if (!continuar) return;
+    // Remove os bloqueados parciais da lista
+    selectedBenefs.splice(0, selectedBenefs.length, ...benefLiberados);
+    if (!selectedBenefs.length) { alert('Nenhum benefício disponível para registrar.'); return; }
+  }
   const btn=document.getElementById(`btn-${eid}`);
   btn.disabled=true;btn.innerHTML='<i class="ti ti-loader"></i> Registrando...';
   const now=new Date();
@@ -670,9 +903,10 @@ function renderEmpList(){
     const bs=empBenefs(e);
     const tagsHtml=bs.length?bs.map(b=>`<span class="benef-emp-tag">${b}</span>`).join(''):`<span class="benef-emp-tag none"><i class="ti ti-alert-triangle" style="font-size:10px"></i> Nenhum benefício definido</span>`;
     const togglesHtml=beneficios.map(b=>{
-      const on=bs.includes(b);
-      return `<label class="benef-toggle ${on?'on':''}" onclick="toggleBenefEmp('${eid}','${b.replace(/'/g,"\\'")}',this)">
-        <i class="ti ti-${on?'check':'plus'}" style="font-size:12px"></i>${b}</label>`;
+      const nome=getBenefNome(b);
+      const on=bs.includes(nome);
+      return `<label class="benef-toggle ${on?'on':''}" onclick="toggleBenefEmp('${eid}','${nome.replace(/'/g,"\\'")}',this)">
+        <i class="ti ti-${on?'check':'plus'}" style="font-size:12px"></i>${nome}</label>`;
     }).join('');
     return `<div class="emp-card" id="ecard-${eid}">
       <div class="emp-card-header" onclick="toggleEmpCard('${eid}')">
@@ -725,8 +959,11 @@ window.toggleBenefEmp=toggleBenefEmp;
 
 function renderNewBenefToggles(){
   const c=document.getElementById('new-benef-toggles');if(!c)return;
-  c.innerHTML=beneficios.map(b=>`<label class="benef-toggle" onclick="this.classList.toggle('on');var i=this.querySelector('i');i.className='ti ti-'+(this.classList.contains('on')?'check':'plus');i.style.fontSize='12px'">
-    <i class="ti ti-plus" style="font-size:12px"></i>${b}</label>`).join('');
+  c.innerHTML=beneficios.map(b=>{
+    const nome=getBenefNome(b);
+    return `<label class="benef-toggle" onclick="this.classList.toggle('on');var i=this.querySelector('i');i.className='ti ti-'+(this.classList.contains('on')?'check':'plus');i.style.fontSize='12px'">
+      <i class="ti ti-plus" style="font-size:12px"></i>${nome}</label>`;
+  }).join('');
 }
 
 async function toggleStatus(eid){
@@ -758,19 +995,72 @@ window.addEmployee=addEmployee;
 
 // ── BENEFÍCIOS E LOJAS ──
 function renderBenef(){
-  document.getElementById('benef-chips').innerHTML=beneficios.length
-    ?beneficios.map((b,i)=>`<span class="chip green">${b}<button onclick="removeBenef(${i})">×</button></span>`).join('')
-    :'<span style="font-size:13px;color:var(--gray-400)">Nenhum cadastrado</span>';
+  const el=document.getElementById('benef-list');
+  if(!el)return;
+  if(!beneficios.length){el.innerHTML='<div class="empty">Nenhum benefício cadastrado</div>';}
+  else{
+    const periodoLabel={mes:'Por mês',trimestre:'Por trimestre',semestre:'Por semestre',ano:'Por ano',aniversario:'Aniversário'};
+    const bloqueioLabel={total:'Bloqueia tudo',parcial:'Bloqueia só este'};
+    el.innerHTML=beneficios.map((b,i)=>{
+      const nome=getBenefNome(b);
+      const lim=getBenefLimite(b);
+      return `<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:.5px solid var(--gray-100);gap:8px;flex-wrap:wrap">
+        <div>
+          <div style="font-size:14px;font-weight:500">${nome}</div>
+          <div style="margin-top:3px">
+            ${lim
+              ?`<span style="color:var(--amber-700);background:var(--amber-50);border:1px solid var(--amber-100);padding:2px 8px;border-radius:99px;font-size:11px;font-weight:600"><i class="ti ti-clock" style="font-size:10px"></i> ${lim.vezes}x ${periodoLabel[lim.periodo]||lim.periodo} · ${bloqueioLabel[lim.bloqueio]||lim.bloqueio}</span>`
+              :`<span style="color:var(--green-700);background:var(--green-50);border:1px solid var(--green-100);padding:2px 8px;border-radius:99px;font-size:11px;font-weight:600"><i class="ti ti-infinity" style="font-size:10px"></i> Ilimitado</span>`}
+          </div>
+        </div>
+        <div style="display:flex;gap:6px">
+          <button class="btn btn-sm btn-blue" onclick="openModalBenefLimite(${i})"><i class="ti ti-settings"></i> Limite</button>
+          <button class="btn btn-sm btn-red" onclick="removeBenef(${i})"><i class="ti ti-trash"></i></button>
+        </div>
+      </div>`;
+    }).join('');
+  }
   document.getElementById('loja-chips').innerHTML=lojas.length
     ?lojas.map((l,i)=>`<span class="chip blue">${l}<button onclick="removeLoja(${i})">×</button></span>`).join('')
     :'<span style="font-size:13px;color:var(--gray-400)">Nenhuma cadastrada</span>';
 }
+
+function toggleNewBenefLimite(){const v=document.getElementById('new-benef-tem-limite').value;document.getElementById('new-benef-limite-campos').style.display=v==='sim'?'block':'none';}
+function toggleEditBenefLimite(){const v=document.getElementById('edit-benef-tem-limite').value;document.getElementById('edit-benef-limite-campos').style.display=v==='sim'?'block':'none';}
+window.toggleNewBenefLimite=toggleNewBenefLimite;window.toggleEditBenefLimite=toggleEditBenefLimite;
+
+function openModalBenefLimite(i){
+  const b=beneficios[i];const nome=getBenefNome(b);const lim=getBenefLimite(b);
+  document.getElementById('edit-benef-idx').value=i;
+  document.getElementById('edit-benef-nome').value=nome;
+  document.getElementById('edit-benef-tem-limite').value=lim?'sim':'nao';
+  document.getElementById('edit-benef-limite-campos').style.display=lim?'block':'none';
+  if(lim){document.getElementById('edit-benef-vezes').value=lim.vezes||1;document.getElementById('edit-benef-periodo').value=lim.periodo||'mes';document.getElementById('edit-benef-bloqueio').value=lim.bloqueio||'total';}
+  document.getElementById('modal-benef-limite').classList.add('open');
+}
+function closeModalBenefLimite(){document.getElementById('modal-benef-limite').classList.remove('open');}
+async function salvarLimiteBenef(){
+  const i=parseInt(document.getElementById('edit-benef-idx').value);
+  const temLimite=document.getElementById('edit-benef-tem-limite').value==='sim';
+  const b=beneficios[i];const bObj=typeof b==='string'?{nome:b}:{...b};
+  bObj.limite=temLimite?{ativo:true,vezes:parseInt(document.getElementById('edit-benef-vezes').value)||1,periodo:document.getElementById('edit-benef-periodo').value,bloqueio:document.getElementById('edit-benef-bloqueio').value}:{ativo:false};
+  beneficios[i]=bObj;
+  await fbSaveSettings();closeModalBenefLimite();renderBenef();renderNewBenefToggles();
+}
+window.openModalBenefLimite=openModalBenefLimite;window.closeModalBenefLimite=closeModalBenefLimite;window.salvarLimiteBenef=salvarLimiteBenef;
+
 async function addBenef(){
-  const v=document.getElementById('new-benef').value.trim();if(!v||beneficios.includes(v))return;
-  beneficios.push(v);await fbSaveSettings();document.getElementById('new-benef').value='';renderBenef();renderNewBenefToggles();
+  const nome=document.getElementById('new-benef').value.trim();
+  if(!nome||beneficios.some(b=>getBenefNome(b)===nome))return;
+  const temLimite=document.getElementById('new-benef-tem-limite').value==='sim';
+  const bObj={nome};
+  bObj.limite=temLimite?{ativo:true,vezes:parseInt(document.getElementById('new-benef-vezes').value)||1,periodo:document.getElementById('new-benef-periodo').value,bloqueio:document.getElementById('new-benef-bloqueio').value}:{ativo:false};
+  beneficios.push(bObj);await fbSaveSettings();
+  document.getElementById('new-benef').value='';document.getElementById('new-benef-tem-limite').value='nao';document.getElementById('new-benef-limite-campos').style.display='none';
+  renderBenef();renderNewBenefToggles();
 }
 async function removeBenef(i){
-  const nome=beneficios[i];if(!confirm(`Remover "${nome}"?`))return;
+  const nome=getBenefNome(beneficios[i]);if(!confirm(`Remover "${nome}"?`))return;
   beneficios.splice(i,1);
   employees.forEach(e=>{if(Array.isArray(e.beneficios))e.beneficios=e.beneficios.filter(b=>b!==nome);});
   if(isConnected){await fbSaveSettings();for(const e of employees)await fbUpdate('employees',e.fbId,{beneficios:e.beneficios});}
