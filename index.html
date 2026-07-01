@@ -219,7 +219,14 @@ label{font-size:12px;color:var(--gray-700);display:block;margin-bottom:4px;font-
       <!-- FUNCIONÁRIOS -->
       <div id="s-func" class="subsection visible">
         <div class="card">
-          <div class="section-title">Funcionários — clique para expandir e editar</div>
+          <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:12px">
+            <div class="section-title" style="margin:0">Funcionários — clique para expandir e editar</div>
+            <div style="position:relative;min-width:220px;flex:1;max-width:340px">
+              <i class="ti ti-search" style="position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--gray-400);font-size:14px;pointer-events:none"></i>
+              <input type="text" id="filtro-emp" placeholder="Buscar por nome, CPF ou loja..." oninput="filtrarEmps()" style="width:100%;padding:8px 10px 8px 32px;border:1.5px solid var(--gray-200);border-radius:var(--radius);font-size:13px;font-family:var(--font);outline:none;box-sizing:border-box" onfocus="this.style.borderColor='var(--green-600)'" onblur="this.style.borderColor='var(--gray-200)'">
+            </div>
+          </div>
+          <div id="emp-count" style="font-size:12px;color:var(--gray-400);margin-bottom:8px"></div>
           <div id="emp-list"></div>
         </div>
         <div class="card">
@@ -925,7 +932,8 @@ function renderEmpList(){
       return `<label class="benef-toggle ${on?'on':''}" onclick="toggleBenefEmp('${eid}','${nome.replace(/'/g,"\\'")}',this)">
         <i class="ti ti-${on?'check':'plus'}" style="font-size:12px"></i>${nome}</label>`;
     }).join('');
-    return `<div class="emp-card" id="ecard-${eid}">
+    const _sd=`${e.nome} ${e.cpf||''} ${e.cargo||''} ${e.setor||''}`.toLowerCase();
+    return `<div class="emp-card" id="ecard-${eid}" data-search="${_sd}">`
       <div class="emp-card-header" onclick="toggleEmpCard('${eid}')">
         <div style="display:flex;align-items:center;gap:12px;flex:1;min-width:0">
           <div class="avatar" style="width:38px;height:38px;font-size:13px;background:${e.status==='ativo'?'var(--green-50)':'var(--gray-100)'};color:${e.status==='ativo'?'var(--green-900)':'var(--gray-700)'}">
@@ -952,6 +960,8 @@ function renderEmpList(){
       </div>
     </div>`;
   }).join('');
+  // Atualiza contagem e reaplica filtro
+  setTimeout(()=>{ filtrarEmps(); }, 0);
 }
 
 function toggleEmpCard(id){
@@ -974,7 +984,21 @@ async function toggleBenefEmp(eid,benef,labelEl){
 }
 window.toggleBenefEmp=toggleBenefEmp;
 
-function renderNewBenefToggles(){
+function filtrarEmps(){
+  const q = (document.getElementById('filtro-emp')?.value||'').toLowerCase().trim();
+  const cards = document.querySelectorAll('#emp-list .emp-card');
+  let vis = 0;
+  cards.forEach(card => {
+    const txt = card.dataset.search||'';
+    const show = !q || txt.includes(q);
+    card.style.display = show ? '' : 'none';
+    if(show) vis++;
+  });
+  const total = cards.length;
+  const el = document.getElementById('emp-count');
+  if(el) el.textContent = q ? `${vis} de ${total} funcionário(s) encontrado(s)` : `${total} funcionário(s) cadastrado(s)`;
+}
+window.filtrarEmps = filtrarEmps;
   const c=document.getElementById('new-benef-toggles');if(!c)return;
   c.innerHTML=beneficios.map(b=>{
     const nome=getBenefNome(b);
