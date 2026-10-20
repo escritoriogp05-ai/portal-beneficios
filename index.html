@@ -3794,6 +3794,17 @@ function applyAppMode(){
   } else {
     ocultar('#consulta-tab-benef'); ocultar('#consulta-area-benef');
     ocultar('button.subtab[onclick*="s-hist"]'); ocultar('#s-hist');
+    // Tudo que é específico de benefícios fica oculto neste app
+    const st=document.createElement('style');
+    st.textContent='#s-benef > .card:first-child{display:none!important}.benef-emp-tags,.benef-section-label,#ebody-x{display:none!important}.emp-card-body .benef-toggle-list{display:none!important}#bloco-novo-benef-func{display:none!important}';
+    document.head.appendChild(st);
+    const nb=document.getElementById('new-benef-toggles'); if(nb&&nb.parentElement) nb.parentElement.style.display='none';
+    const su=document.getElementById('stat-usos'); if(su&&su.parentElement) su.parentElement.style.display='none';
+    const tabC=document.querySelector('button.tab[onclick*="consulta"]'); if(tabC) tabC.innerHTML='<i class="ti ti-search"></i> Consulta de Fardamento';
+    const subB=document.querySelector('button.subtab[onclick*="s-benef"]'); if(subB) subB.innerHTML='<i class="ti ti-building-store"></i> Lojas e Supervisores';
+    const hdr=document.querySelector('.header-logo span, .logo span'); 
+    document.querySelectorAll('span').forEach(sp=>{ if(sp.textContent.trim()==='— Portal de Benefícios') sp.textContent='— Portal de Fardamento'; });
+    document.querySelectorAll('#lock-screen-consulta p').forEach(p=>{ p.textContent='Digite a senha da sua loja para acessar a consulta de fardamento.'; });
     document.title='Fardamento — BIG TRADING';
     setTimeout(()=>{ switchConsultaTab('fard'); },0);
   }
@@ -3803,7 +3814,7 @@ applyAppMode();
 (function(){
   try{
     if(location.protocol==='file:'){
-      const url='https://escritoriogp05-ai.github.io/portal-beneficios/';
+      const url='https://escritoriogp05-ai.github.io/portal-beneficios/'+(APP_MODE==='fardamento'?'fardamento.html':'');
       const bar=document.createElement('div');
       bar.style.cssText='position:sticky;top:0;z-index:9999;background:#b91c1c;color:#fff;padding:12px 16px;font-size:14px;text-align:center;font-family:inherit';
       bar.innerHTML='⚠️ Você está usando um arquivo salvo no computador, que <b>não recebe atualizações</b>. Use o link oficial: <a href="'+url+'" style="color:#fff;font-weight:700;text-decoration:underline">'+url+'</a> (salve nos favoritos e pode apagar o arquivo antigo).';
